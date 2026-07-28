@@ -1,77 +1,54 @@
-import { auth, googleProvider } from "./firebase-config.js";
+import { auth, db, googleProvider } from "./firebase-config.js";
 import { signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { addDoc, collection, deleteDoc, doc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-const colleges=[['🌿','العلوم الزراعية والبحرية','1,280 طالب'],['⚙️','الهندسة','2,140 طالب'],['🧪','العلوم','1,930 طالب'],['💼','الاقتصاد والعلوم السياسية','2,010 طالب'],['⚖️','الحقوق','960 طالب'],['📚','الآداب والعلوم الاجتماعية','2,320 طالب'],['🩺','الطب والعلوم الصحية','1,440 طالب'],['🎓','التربية','1,760 طالب']];
-const summaries=[
- {title:'اقتصاديات الموارد الطبيعية',college:'العلوم الزراعية والبحرية',type:'ملخص',code:'NRE 3020',pages:24,author:'ناصر الرمحي'},
- {title:'التفاضل والتكامل 1',college:'العلوم',type:'شرح',code:'MATH 2107',pages:31,author:'مريم الهنائية'},
- {title:'مبادئ الإدارة',college:'الاقتصاد والعلوم السياسية',type:'اختبار سابق',code:'MNGT 1001',pages:12,author:'أحمد الرواحي'},
- {title:'ميكانيكا الموائع',college:'الهندسة',type:'ملخص',code:'MEIE 3202',pages:27,author:'سارة البلوشية'},
- {title:'القانون الدستوري',college:'الحقوق',type:'ملخص',code:'LAWW 2104',pages:19,author:'خالد المعمري'},
- {title:'علم النفس التربوي',college:'التربية',type:'شرح',code:'EDUC 2201',pages:22,author:'هدى الشحية'}
-];
-const posts=[
- {name:'مريم الهنائية',college:'كلية العلوم',text:'رفعت اليوم ملخصًا جديدًا لمادة التفاضل والتكامل، مرتب حسب المحاضرات مع أمثلة محلولة. أتمنى يفيدكم 🤍',likes:124,comments:18},
- {name:'أحمد الرواحي',college:'كلية الاقتصاد والعلوم السياسية',text:'من لديه تجربة مع التدريب الصيفي في القطاع المصرفي؟ أبحث عن نصائح حول المقابلات وطريقة تجهيز السيرة الذاتية.',likes:67,comments:31}
-];
-const news=[['29 يوليو 2026','فتح باب التسجيل في الأنشطة الطلابية','تعرف على الجماعات الطلابية ومواعيد التسجيل الجديدة.'],['28 يوليو 2026','ورشة مجانية في الذكاء الاصطناعي','ورشة عملية للطلاب حول استخدام أدوات الذكاء الاصطناعي في الدراسة.'],['27 يوليو 2026','تحديث مواعيد الحافلات','تم نشر الجدول المحدث لمسارات الحافلات داخل الحرم الجامعي.']];
-const storyNames=['العلوم','الهندسة','الطب','الحقوق','الاقتصاد'];
-const $=s=>document.querySelector(s);
-const grid=$('#collegeGrid'); colleges.forEach(c=>grid.insertAdjacentHTML('beforeend',`<article class="college-card"><div class="college-icon">${c[0]}</div><h3>${c[1]}</h3><p>${c[2]} • مجتمع نشط</p></article>`));
-const collegeFilter=$('#collegeFilter'); [...new Set(summaries.map(s=>s.college))].forEach(c=>collegeFilter.insertAdjacentHTML('beforeend',`<option>${c}</option>`));
-function renderSummaries(){const q=$('#searchInput').value.trim().toLowerCase(),college=collegeFilter.value,type=$('#typeFilter').value;const data=summaries.filter(s=>(s.title.toLowerCase().includes(q)||s.code.toLowerCase().includes(q))&&(college==='all'||s.college===college)&&(type==='all'||s.type===type));$('#summaryGrid').innerHTML=data.map(s=>`<article class="summary-card"><div class="summary-top"><div class="file-icon">📄</div><span class="badge">${s.type}</span></div><h3>${s.title}</h3><p>${s.college} • ${s.code}</p><div class="meta"><span>${s.pages} صفحة</span><span>بواسطة ${s.author}</span></div></article>`).join('')||'<p>لا توجد نتائج مطابقة.</p>'}
-renderSummaries();['searchInput','collegeFilter','typeFilter'].forEach(id=>$('#'+id).addEventListener('input',renderSummaries));
-$('#feed').innerHTML=posts.map(p=>`<article class="post"><div class="post-head"><div class="avatar">${p.name[0]}</div><div><strong>${p.name}</strong><small>${p.college} • منذ ساعتين</small></div></div><p>${p.text}</p><div class="post-actions"><span>♡ ${p.likes}</span><span>💬 ${p.comments}</span><span>↗ مشاركة</span></div></article>`).join('');
-$('#newsList').innerHTML=news.map(n=>`<article class="news-item"><time>${n[0]}</time><h3>${n[1]}</h3><p>${n[2]}</p></article>`).join('');
-$('#stories').innerHTML=storyNames.map((n,i)=>`<div class="story"><div class="story-avatar"><b>${['🌿','⚙️','🩺','⚖️','💼'][i]}</b></div><small>${n}</small></div>`).join('');
-const modal=$('#modal');function openModal(title,text){$('#modalTitle').textContent=title;$('#modalText').textContent=text;modal.showModal()}
-const loginButton = $('#googleLogin');
-const userMenu = $('#userMenu');
-const logoutButton = $('#logoutButton');
+const $ = (s) => document.querySelector(s);
+const state = { user:null, posts:[], myOnly:false, unsubscribe:null };
+const fallbackAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' rx='50' fill='%23143b35'/%3E%3Ctext x='50' y='63' text-anchor='middle' font-size='44'%3E👤%3C/text%3E%3C/svg%3E";
 
-loginButton.onclick = async () => {
-  loginButton.disabled = true;
-  loginButton.textContent = 'جارٍ تسجيل الدخول...';
-  try {
-    await signInWithPopup(auth, googleProvider);
-  } catch (error) {
-    console.error(error);
-    const friendlyMessage = error.code === 'auth/popup-closed-by-user'
-      ? 'أُغلقت نافذة تسجيل الدخول قبل إكمال العملية.'
-      : error.code === 'auth/unauthorized-domain'
-        ? 'أضف نطاق موقعك إلى Authorized domains داخل Firebase Authentication.'
-        : 'تعذر تسجيل الدخول حاليًا. تأكد من إعدادات Firebase واتصال الإنترنت.';
-    openModal('تعذر تسجيل الدخول', friendlyMessage);
-  } finally {
-    loginButton.disabled = false;
-    loginButton.innerHTML = '<span>G</span> تسجيل الدخول';
-  }
-};
+function escapeHTML(value=""){return String(value).replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));}
+function notice(title,text){$("#noticeTitle").textContent=title;$("#noticeText").textContent=text;$("#noticeDialog").showModal();}
+function requireLogin(){if(!state.user){notice("سجّل الدخول أولًا","تسجيل الدخول بحساب Google مطلوب لإضافة الملفات.");return false;}return true;}
+function formatDate(ts){if(!ts?.toDate)return "الآن";return new Intl.DateTimeFormat("ar-OM",{day:"numeric",month:"long",year:"numeric"}).format(ts.toDate());}
+function isDriveLink(value){try{const u=new URL(value);return u.protocol==="https:" && (u.hostname==="drive.google.com" || u.hostname==="docs.google.com");}catch{return false;}}
+async function ensureUser(user){await setDoc(doc(db,"users",user.uid),{uid:user.uid,name:user.displayName||"مستخدم",email:user.email||"",photoURL:user.photoURL||"",lastSeen:serverTimestamp()},{merge:true});}
 
-logoutButton.onclick = async () => {
-  try {
-    await signOut(auth);
-  } catch (error) {
-    console.error(error);
-    openModal('تعذر تسجيل الخروج', 'حاول مرة أخرى.');
-  }
-};
+function startPosts(){
+  state.unsubscribe?.();
+  state.unsubscribe=onSnapshot(query(collection(db,"posts"),orderBy("createdAt","desc"),limit(150)),snap=>{state.posts=snap.docs.map(d=>({id:d.id,...d.data()}));renderPosts();},err=>{console.error(err);$("#feed").innerHTML='<p class="empty">تعذر تحميل الملفات. تأكد من نشر قواعد Firestore.</p>';});
+}
+function renderPosts(){
+  const term=$("#searchInput").value.trim().toLowerCase();
+  const category=$("#categoryFilter").value;
+  const posts=state.posts.filter(p=>(!state.myOnly||p.uid===state.user?.uid)&&(!category||p.category===category)&&(!term||`${p.title||""} ${p.description||""} ${p.course||""} ${p.userName||""}`.toLowerCase().includes(term)));
+  const feed=$("#feed");
+  if(!posts.length){feed.innerHTML='<p class="empty">لا توجد ملفات مطابقة حاليًا.</p>';return;}
+  feed.innerHTML=posts.map(p=>`<article class="resource-card">
+    <div class="resource-head"><span class="file-icon">↗</span><span class="category-pill">${escapeHTML(p.category||"ملف")}</span></div>
+    <div class="resource-body"><p class="course-name">${escapeHTML(p.course||"")}</p><h3>${escapeHTML(p.title||"")}</h3><p class="resource-description">${escapeHTML(p.description||"")}</p></div>
+    <div class="resource-author"><img class="avatar" src="${p.userPhoto||fallbackAvatar}" alt=""><div><strong>${escapeHTML(p.userName||"مستخدم")}</strong><small>${formatDate(p.createdAt)}</small></div></div>
+    <div class="resource-actions"><a class="open-link" href="${escapeHTML(p.driveUrl||"#")}" target="_blank" rel="noopener noreferrer">فتح الملف في Google Drive</a>${p.uid===state.user?.uid?`<button class="delete-btn" data-delete="${p.id}">حذف</button>`:""}</div>
+  </article>`).join("");
+  feed.querySelectorAll("[data-delete]").forEach(btn=>btn.onclick=()=>removePost(btn.dataset.delete));
+}
+async function removePost(id){if(!confirm("هل تريد حذف هذا الرابط؟"))return;try{await deleteDoc(doc(db,"posts",id));}catch(err){console.error(err);notice("تعذر الحذف","لا يمكنك حذف رابط لا تملكه.");}}
+function openPostDialog(){if(requireLogin())$("#postDialog").showModal();}
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    loginButton.hidden = true;
-    userMenu.hidden = false;
-    $('#userName').textContent = user.displayName || 'طالب';
-    $('#userEmail').textContent = user.email || '';
-    $('#userPhoto').src = user.photoURL || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="32" fill="%2357e3a1"/%3E%3Ctext x="32" y="40" text-anchor="middle" font-size="28"%3E👤%3C/text%3E%3C/svg%3E';
-  } else {
-    loginButton.hidden = false;
-    userMenu.hidden = true;
-    $('#userPhoto').removeAttribute('src');
-  }
+$("#postForm").onsubmit=async(e=>{e.preventDefault();if(!requireLogin())return;
+  const title=$("#postTitle").value.trim(), category=$("#postCategory").value, course=$("#postCourse").value.trim(), driveUrl=$("#postLink").value.trim(), description=$("#postDescription").value.trim(), btn=$("#publishPost");
+  if(!isDriveLink(driveUrl)){notice("الرابط غير صحيح","أدخل رابطًا من Google Drive أو Google Docs يبدأ بـ https://");return;}
+  btn.disabled=true;btn.textContent="جارٍ النشر…";
+  try{await addDoc(collection(db,"posts"),{uid:state.user.uid,userName:state.user.displayName||"مستخدم",userPhoto:state.user.photoURL||"",title,category,course,driveUrl,description,createdAt:serverTimestamp()});e.target.reset();$("#postDialog").close();}
+  catch(err){console.error(err);notice("تعذر نشر الرابط","تأكد من نشر قواعد Firestore ثم حاول مرة أخرى.");}
+  finally{btn.disabled=false;btn.textContent="نشر الرابط";}
 });
-$('#uploadButton').onclick=()=>openModal('رفع الملخصات','سيتم تفعيل رفع PDF والصور بعد ربط Firebase Storage وقواعد المراجعة.');
-$('#newPost').onclick=()=>openModal('إنشاء منشور','سيتم تفعيل المنشورات والتعليقات عند ربط قاعدة البيانات.');
-$('#themeToggle').onclick=()=>{document.body.classList.toggle('light');$('#themeToggle').textContent=document.body.classList.contains('light')?'☀':'☾'};
-document.querySelectorAll('[data-scroll]').forEach(b=>b.onclick=()=>document.querySelector(b.dataset.scroll).scrollIntoView());
-document.querySelectorAll('.nav-links a').forEach(a=>a.onclick=()=>{document.querySelectorAll('.nav-links a').forEach(x=>x.classList.remove('active'));a.classList.add('active')});
+
+$("#googleLogin").onclick=async()=>{const btn=$("#googleLogin");btn.disabled=true;try{await signInWithPopup(auth,googleProvider);}catch(err){console.error(err);notice("تعذر تسجيل الدخول",err.code==="auth/unauthorized-domain"?"أضف نطاق GitHub Pages في Authorized domains داخل Firebase.":"أُغلقت نافذة تسجيل الدخول أو تعذر الاتصال.");}finally{btn.disabled=false;}};
+$("#logoutButton").onclick=()=>signOut(auth);
+onAuthStateChanged(auth,async user=>{state.user=user;if(user){await ensureUser(user);$("#googleLogin").hidden=true;$("#userMenu").hidden=false;$("#userName").textContent=user.displayName||"مستخدم";$("#userEmail").textContent=user.email||"";$("#userPhoto").src=user.photoURL||fallbackAvatar;startPosts();}else{$("#googleLogin").hidden=false;$("#userMenu").hidden=true;state.posts=[];state.unsubscribe?.();$("#feed").innerHTML='<p class="empty">سجّل الدخول لمشاهدة الملفات ومشاركة رابطك.</p>';}});
+
+$("#searchInput").oninput=renderPosts;$("#categoryFilter").onchange=renderPosts;
+$("#myPostsBtn").onclick=()=>{if(!requireLogin())return;state.myOnly=!state.myOnly;$("#myPostsBtn").classList.toggle("active",state.myOnly);$("#myPostsBtn").textContent=state.myOnly?"عرض الجميع":"ملفاتي";renderPosts();};
+$("#addPostBtn").onclick=openPostDialog;$("#heroAddPost").onclick=openPostDialog;$("#browsePosts").onclick=()=>$("#postsSection").scrollIntoView({behavior:"smooth"});
+$("#themeToggle").onclick=()=>{document.body.classList.toggle("dark");const dark=document.body.classList.contains("dark");$("#themeToggle").textContent=dark?"☀":"☾";localStorage.setItem("theme",dark?"dark":"light");};if(localStorage.getItem("theme")==="dark"){document.body.classList.add("dark");$("#themeToggle").textContent="☀";}
+document.querySelectorAll("[data-close]").forEach(btn=>btn.onclick=()=>document.getElementById(btn.dataset.close).close());

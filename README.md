@@ -1,27 +1,13 @@
-# SQU Students Hub — Firebase Login V1
+# SQU Drive Hub
+نسخة مبسطة لمشاركة روابط Google Drive بين الطلاب.
 
-نسخة أولى تعمل بتسجيل الدخول عبر Google باستخدام Firebase Authentication.
+## طريقة التشغيل
+1. ارفع الملفات إلى مستودع GitHub Pages.
+2. أضف نطاق GitHub Pages في Firebase Authentication > Settings > Authorized domains.
+3. انسخ محتوى `firestore.rules` إلى Firestore Database > Rules ثم اضغط Publish.
+4. افتح الموقع، سجل الدخول، ثم أضف عنوان الملف ووصفه ورابط Google Drive.
 
-## الملفات
-- `index.html`
-- `style.css`
-- `script.js`
-- `firebase-config.js`
+## قبل مشاركة رابط Drive
+Share > General access > Anyone with the link > Viewer
 
-## التشغيل
-لا تفتح `index.html` مباشرة بصيغة `file://` لأن وحدات JavaScript تحتاج خادمًا.
-
-يمكن نشر الملفات على GitHub Pages، أو تشغيلها محليًا عبر VS Code Live Server.
-
-## إعداد Firebase المطلوب
-1. Authentication > Sign-in method > Google = Enabled.
-2. Authentication > Settings > Authorized domains.
-3. أضف نطاق GitHub Pages الخاص بك، مثل:
-   `dralrumhi-tech.github.io`
-
-## GitHub Pages
-ارفع الملفات إلى جذر المستودع، ثم:
-Settings > Pages > Deploy from a branch > main > /(root)
-
-## ملاحظة
-هذه النسخة تفعّل تسجيل الدخول والخروج فقط. لا تستخدم Firebase Storage ولا تحتاج إلى الترقية لخطة مدفوعة.
+لا تحتاج Firebase Storage ولا رفع صور داخل الموقع.
