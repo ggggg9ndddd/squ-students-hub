@@ -27,6 +27,11 @@
     <div class="top-actions">
       <button class="icon-button" id="themeToggle" aria-label="تبديل الوضع">☾</button>
       <button class="login-button" id="googleLogin"><span>G</span> تسجيل الدخول</button>
+      <div class="user-menu" id="userMenu" hidden>
+        <img id="userPhoto" alt="صورة المستخدم" referrerpolicy="no-referrer" />
+        <div class="user-meta"><strong id="userName">طالب</strong><small id="userEmail"></small></div>
+        <button class="logout-button" id="logoutButton" type="button">خروج</button>
+      </div>
     </div>
   </header>
 
@@ -106,6 +111,6 @@
     </form>
   </dialog>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>

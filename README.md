@@ -1,14 +1,27 @@
-# SQU Students Hub
+# SQU Students Hub — Firebase Login V1
 
-منصة طلابية عربية مستقلة للملخصات والمجتمعات والأخبار والقصص اليومية.
+نسخة أولى تعمل بتسجيل الدخول عبر Google باستخدام Firebase Authentication.
 
-## التشغيل محليًا
-افتح ملف `index.html` مباشرة في المتصفح، أو استخدم خادمًا محليًا بسيطًا.
+## الملفات
+- `index.html`
+- `style.css`
+- `script.js`
+- `firebase-config.js`
 
-## النشر على GitHub Pages
-1. أنشئ مستودعًا جديدًا باسم `squ-students-hub`.
-2. ارفع الملفات الموجودة في هذا المجلد.
-3. من Settings > Pages اختر الفرع `main` والمجلد `/root`.
+## التشغيل
+لا تفتح `index.html` مباشرة بصيغة `file://` لأن وحدات JavaScript تحتاج خادمًا.
 
-## التفعيل الكامل
-النسخة الحالية واجهة أمامية تجريبية. لتفعيل تسجيل Google ورفع الملفات والمنشورات والإشعارات، اربط المشروع مع Firebase Authentication وFirestore وStorage وCloud Messaging.
+يمكن نشر الملفات على GitHub Pages، أو تشغيلها محليًا عبر VS Code Live Server.
+
+## إعداد Firebase المطلوب
+1. Authentication > Sign-in method > Google = Enabled.
+2. Authentication > Settings > Authorized domains.
+3. أضف نطاق GitHub Pages الخاص بك، مثل:
+   `dralrumhi-tech.github.io`
+
+## GitHub Pages
+ارفع الملفات إلى جذر المستودع، ثم:
+Settings > Pages > Deploy from a branch > main > /(root)
+
+## ملاحظة
+هذه النسخة تفعّل تسجيل الدخول والخروج فقط. لا تستخدم Firebase Storage ولا تحتاج إلى الترقية لخطة مدفوعة.

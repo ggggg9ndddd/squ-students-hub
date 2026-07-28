@@ -1,3 +1,6 @@
+import { auth, googleProvider } from "./firebase-config.js";
+import { signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
 const colleges=[['🌿','العلوم الزراعية والبحرية','1,280 طالب'],['⚙️','الهندسة','2,140 طالب'],['🧪','العلوم','1,930 طالب'],['💼','الاقتصاد والعلوم السياسية','2,010 طالب'],['⚖️','الحقوق','960 طالب'],['📚','الآداب والعلوم الاجتماعية','2,320 طالب'],['🩺','الطب والعلوم الصحية','1,440 طالب'],['🎓','التربية','1,760 طالب']];
 const summaries=[
  {title:'اقتصاديات الموارد الطبيعية',college:'العلوم الزراعية والبحرية',type:'ملخص',code:'NRE 3020',pages:24,author:'ناصر الرمحي'},
@@ -22,7 +25,51 @@ $('#feed').innerHTML=posts.map(p=>`<article class="post"><div class="post-head">
 $('#newsList').innerHTML=news.map(n=>`<article class="news-item"><time>${n[0]}</time><h3>${n[1]}</h3><p>${n[2]}</p></article>`).join('');
 $('#stories').innerHTML=storyNames.map((n,i)=>`<div class="story"><div class="story-avatar"><b>${['🌿','⚙️','🩺','⚖️','💼'][i]}</b></div><small>${n}</small></div>`).join('');
 const modal=$('#modal');function openModal(title,text){$('#modalTitle').textContent=title;$('#modalText').textContent=text;modal.showModal()}
-$('#googleLogin').onclick=()=>openModal('تسجيل الدخول بجوجل','الواجهة جاهزة، ويتطلب التشغيل الفعلي إضافة إعدادات Firebase الخاصة بالمشروع.');
+const loginButton = $('#googleLogin');
+const userMenu = $('#userMenu');
+const logoutButton = $('#logoutButton');
+
+loginButton.onclick = async () => {
+  loginButton.disabled = true;
+  loginButton.textContent = 'جارٍ تسجيل الدخول...';
+  try {
+    await signInWithPopup(auth, googleProvider);
+  } catch (error) {
+    console.error(error);
+    const friendlyMessage = error.code === 'auth/popup-closed-by-user'
+      ? 'أُغلقت نافذة تسجيل الدخول قبل إكمال العملية.'
+      : error.code === 'auth/unauthorized-domain'
+        ? 'أضف نطاق موقعك إلى Authorized domains داخل Firebase Authentication.'
+        : 'تعذر تسجيل الدخول حاليًا. تأكد من إعدادات Firebase واتصال الإنترنت.';
+    openModal('تعذر تسجيل الدخول', friendlyMessage);
+  } finally {
+    loginButton.disabled = false;
+    loginButton.innerHTML = '<span>G</span> تسجيل الدخول';
+  }
+};
+
+logoutButton.onclick = async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error(error);
+    openModal('تعذر تسجيل الخروج', 'حاول مرة أخرى.');
+  }
+};
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    loginButton.hidden = true;
+    userMenu.hidden = false;
+    $('#userName').textContent = user.displayName || 'طالب';
+    $('#userEmail').textContent = user.email || '';
+    $('#userPhoto').src = user.photoURL || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="32" fill="%2357e3a1"/%3E%3Ctext x="32" y="40" text-anchor="middle" font-size="28"%3E👤%3C/text%3E%3C/svg%3E';
+  } else {
+    loginButton.hidden = false;
+    userMenu.hidden = true;
+    $('#userPhoto').removeAttribute('src');
+  }
+});
 $('#uploadButton').onclick=()=>openModal('رفع الملخصات','سيتم تفعيل رفع PDF والصور بعد ربط Firebase Storage وقواعد المراجعة.');
 $('#newPost').onclick=()=>openModal('إنشاء منشور','سيتم تفعيل المنشورات والتعليقات عند ربط قاعدة البيانات.');
 $('#themeToggle').onclick=()=>{document.body.classList.toggle('light');$('#themeToggle').textContent=document.body.classList.contains('light')?'☀':'☾'};
