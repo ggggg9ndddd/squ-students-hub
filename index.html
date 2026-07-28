@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="منصة طلابية للملخصات والمجتمعات والأخبار الجامعية" />
+  <title>SQU Hub | المجتمع الطلابي الذكي</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar glass">
+    <a class="brand" href="#home" aria-label="الرئيسية">
+      <span class="brand-mark">S</span>
+      <span><strong>SQU Hub</strong><small>المعرفة أقرب</small></span>
+    </a>
+    <nav class="nav-links" aria-label="التنقل الرئيسي">
+      <a class="active" href="#home">الرئيسية</a>
+      <a href="#colleges">الكليات</a>
+      <a href="#summaries">الملخصات</a>
+      <a href="#community">المجتمع</a>
+      <a href="#news">الأخبار</a>
+    </nav>
+    <div class="top-actions">
+      <button class="icon-button" id="themeToggle" aria-label="تبديل الوضع">☾</button>
+      <button class="login-button" id="googleLogin"><span>G</span> تسجيل الدخول</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="orb orb-one"></div><div class="orb orb-two"></div>
+      <div class="hero-copy">
+        <span class="eyebrow">منصة يصنعها الطلاب للطلاب</span>
+        <h1>كل ما تحتاجه في رحلتك الجامعية، <em>داخل مجتمع واحد.</em></h1>
+        <p>ملخصات موثوقة، مجتمعات لكل كلية، قصص يومية، أخبار عاجلة، وفرص للتعاون وتبادل المعرفة.</p>
+        <div class="hero-actions">
+          <button class="primary" data-scroll="#summaries">استكشف الملخصات</button>
+          <button class="secondary" id="uploadButton">ارفع ملخصك</button>
+        </div>
+        <div class="metrics">
+          <div><strong>2,480+</strong><span>طالب</span></div>
+          <div><strong>740+</strong><span>ملخص</span></div>
+          <div><strong>9</strong><span>كليات</span></div>
+        </div>
+      </div>
+      <div class="dashboard-preview glass">
+        <div class="preview-header"><span>لوحة الطالب</span><span class="live"><i></i> مباشر</span></div>
+        <div class="story-row" id="stories"></div>
+        <div class="news-flash"><span>عاجل</span><p>فتح التسجيل للأنشطة الطلابية الجديدة هذا الأسبوع.</p></div>
+        <div class="mini-grid">
+          <article><span>أحدث ملخص</span><h3>اقتصاديات الموارد الطبيعية</h3><small>PDF • 24 صفحة</small></article>
+          <article><span>نشاط مجتمعك</span><h3>كلية العلوم الزراعية والبحرية</h3><small>38 منشورًا جديدًا</small></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="colleges">
+      <div class="section-heading"><div><span>المجتمعات الأكاديمية</span><h2>اختر كليتك وابدأ التواصل</h2></div><button class="text-button">عرض الكل ←</button></div>
+      <div class="college-grid" id="collegeGrid"></div>
+    </section>
+
+    <section class="section surface" id="summaries">
+      <div class="section-heading"><div><span>مكتبة المعرفة</span><h2>ملخصات صنعها الطلاب</h2></div></div>
+      <div class="filter-bar glass">
+        <input id="searchInput" type="search" placeholder="ابحث باسم المادة أو الرمز..." aria-label="البحث عن ملخص" />
+        <select id="collegeFilter" aria-label="تصفية حسب الكلية"><option value="all">جميع الكليات</option></select>
+        <select id="typeFilter" aria-label="تصفية حسب النوع"><option value="all">كل الأنواع</option><option>ملخص</option><option>اختبار سابق</option><option>شرح</option></select>
+      </div>
+      <div class="summary-grid" id="summaryGrid"></div>
+    </section>
+
+    <section class="section" id="community">
+      <div class="section-heading"><div><span>نبض الجامعة</span><h2>من مجتمع الطلاب</h2></div><button class="primary small" id="newPost">+ منشور جديد</button></div>
+      <div class="community-layout">
+        <div class="feed" id="feed"></div>
+        <aside class="sidebar-card glass">
+          <h3>الأكثر نشاطًا</h3>
+          <div class="leader"><span>1</span><div><strong>مريم الهنائية</strong><small>1,240 نقطة</small></div></div>
+          <div class="leader"><span>2</span><div><strong>أحمد الرواحي</strong><small>980 نقطة</small></div></div>
+          <div class="leader"><span>3</span><div><strong>سارة البلوشية</strong><small>875 نقطة</small></div></div>
+          <button class="secondary full">لوحة المساهمين</button>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section news-section" id="news">
+      <div class="section-heading"><div><span>القناة الرسمية</span><h2>أخبار تصل إلى الجميع</h2></div></div>
+      <div class="news-grid">
+        <article class="headline-card"><span class="tag">الأهم اليوم</span><h3>منصة واحدة تربط المعرفة والحياة الجامعية</h3><p>تابع آخر المستجدات والإعلانات والفرص الطلابية في مكان واحد.</p><button class="secondary">اقرأ التفاصيل</button></article>
+        <div class="news-list" id="newsList"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="brand"><span class="brand-mark">S</span><span><strong>SQU Hub</strong><small>صُنع للطلاب</small></span></div><p>مشروع طلابي مستقل وغير تابع للموقع الرسمي للجامعة.</p><span>© 2026</span></footer>
+
+  <dialog id="modal">
+    <form method="dialog" class="modal-card">
+      <button class="close" value="cancel">×</button>
+      <span class="eyebrow">قريبًا</span><h2 id="modalTitle">الميزة قيد التجهيز</h2><p id="modalText">سيتم تفعيل هذه الخاصية بعد ربط المشروع مع Firebase.</p>
+      <button class="primary" value="ok">حسنًا</button>
+    </form>
+  </dialog>
+
+  <script src="script.js"></script>
+</body>
+</html>
