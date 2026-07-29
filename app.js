@@ -4,9 +4,10 @@ import { addDoc, collection, deleteDoc, doc, getDoc, limit, onSnapshot, orderBy,
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
-const state = { user: null, profile: null, posts: [], opinions: [], unsubscribe: null, opinionsUnsubscribe: null };
+const state = { user:null, profile:null, posts:[], opinions:[], collegePosts:[], unsubscribe:null, opinionsUnsubscribe:null, collegeUnsubscribe:null };
 const fallbackAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='60' fill='%2315483f'/%3E%3Ctext x='60' y='76' text-anchor='middle' font-size='52'%3E👤%3C/text%3E%3C/svg%3E";
 
+function normalizeSearch(value=''){return String(value).toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[^a-z0-9؀-ۿ]/g,'');}
 function escapeHTML(value='') { return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 function showNotice(title, text) { if (!$('#noticeDialog')) return alert(text); $('#noticeTitle').textContent = title; $('#noticeText').textContent = text; $('#noticeDialog').showModal(); }
 function formatDate(ts) { return ts?.toDate ? new Intl.DateTimeFormat('ar-OM',{day:'numeric',month:'long',year:'numeric'}).format(ts.toDate()) : 'الآن'; }
@@ -63,7 +64,7 @@ function renderPosts() {
   const term = ($('#searchInput')?.value || '').trim().toLowerCase();
   let posts = state.posts.filter(p => !pageCategory || p.category === pageCategory);
   if (document.body.dataset.page === 'profile') posts = posts.filter(p => p.uid === state.user?.uid);
-  if (term) posts = posts.filter(p => `${p.title||''} ${p.course||''} ${p.college||''} ${p.description||''} ${p.userName||''}`.toLowerCase().includes(term));
+  if(term){const n=normalizeSearch(term);posts=posts.filter(p=>normalizeSearch(`${p.title||''} ${p.course||''} ${p.college||''} ${p.description||''} ${p.userName||''}`).includes(n));}
   if (!posts.length) { feed.innerHTML = '<p class="empty">لا توجد ملفات في هذا القسم حاليًا.</p>'; return; }
   feed.innerHTML = posts.map(p => `<article class="resource-card">
     <div class="resource-top"><span class="pill">${escapeHTML(p.category || 'ملف')}</span><span>${formatDate(p.createdAt)}</span></div>
@@ -92,9 +93,9 @@ function renderOpinions(){
   const feed=$('#opinionsFeed'); if(!feed) return;
   const term=($('#opinionSearch')?.value||'').trim().toLowerCase();
   let items=state.opinions;
-  if(term) items=items.filter(o=>`${o.course||''} ${o.code||''} ${o.college||''} ${o.text||''}`.toLowerCase().includes(term));
+  if(term){const n=normalizeSearch(term);items=items.filter(o=>normalizeSearch(`${o.course||''} ${o.code||''} ${o.college||''} ${o.text||''}`).includes(n));}
   if(!items.length){feed.innerHTML='<p class="empty">لا توجد آراء منشورة حاليًا.</p>';return;}
-  feed.innerHTML=items.map(o=>`<article class="resource-card opinion-card"><div class="resource-top"><span class="pill">${escapeHTML(o.college||'كلية')}</span><span>${formatDate(o.createdAt)}</span></div><p class="course">${escapeHTML(o.code||'')}</p><h3>${escapeHTML(o.course||'')}</h3><p class="description">${escapeHTML(o.text||'')}</p><div class="author"><img class="avatar" src="${escapeHTML(o.userPhoto||fallbackAvatar)}" alt=""><div><strong>${escapeHTML(o.userName||'طالب')}</strong><small>رأي طالب</small></div></div>${o.uid===state.user?.uid?`<button class="danger-btn opinion-delete" data-opinion-delete="${o.id}">حذف رأيي</button>`:''}</article>`).join('');
+  feed.innerHTML=items.map(o=>{const avg=((Number(o.ratingEase||0)+Number(o.ratingExams||0)+Number(o.ratingWorkload||0)+Number(o.ratingContent||0))/4).toFixed(1);return `<article class="resource-card opinion-card"><div class="resource-top"><span class="pill">${escapeHTML(o.college||'كلية')}</span><span>${formatDate(o.createdAt)}</span></div><p class="course">${escapeHTML(o.code||'')}</p><h3>${escapeHTML(o.course||'')}</h3><div class="rating-summary"><strong>⭐ ${avg}/5</strong><span>السهولة ${o.ratingEase||'-'} · الاختبارات ${o.ratingExams||'-'} · الواجبات ${o.ratingWorkload||'-'} · المحتوى ${o.ratingContent||'-'}</span></div><p class="description">${escapeHTML(o.text||'')}</p><div class="author"><img class="avatar" src="${escapeHTML(o.userPhoto||fallbackAvatar)}" alt=""><div><strong>${escapeHTML(o.userName||'طالب')}</strong><small>رأي طالب</small></div></div>${o.uid===state.user?.uid?`<button class="danger-btn opinion-delete" data-opinion-delete="${o.id}">حذف رأيي</button>`:''}</article>`}).join('');
   $$('[data-opinion-delete]').forEach(btn=>btn.onclick=async()=>{if(confirm('هل تريد حذف هذا الرأي؟')) await deleteDoc(doc(db,'opinions',btn.dataset.opinionDelete));});
 }
 
@@ -102,7 +103,7 @@ function initForms() {
   $('#opinionForm')?.addEventListener('submit', async e => {
     e.preventDefault(); if(!requireLogin()) return;
     const btn=$('#publishOpinion'); btn.disabled=true; btn.textContent='جارٍ النشر…';
-    try { await addDoc(collection(db,'opinions'),{uid:state.user.uid,userName:state.profile?.name||state.user.displayName||'طالب',userPhoto:state.user.photoURL||'',course:$('#opinionCourse').value.trim(),code:$('#opinionCode').value.trim(),college:$('#opinionCollege').value,text:$('#opinionText').value.trim(),createdAt:serverTimestamp()}); e.target.reset(); $('#opinionDialog').close(); }
+    try { await addDoc(collection(db,'opinions'),{uid:state.user.uid,userName:state.profile?.name||state.user.displayName||'طالب',userPhoto:state.user.photoURL||'',course:$('#opinionCourse').value.trim(),code:$('#opinionCode').value.trim(),college:$('#opinionCollege').value,text:$('#opinionText').value.trim(),ratingEase:Number($('#ratingEase').value),ratingExams:Number($('#ratingExams').value),ratingWorkload:Number($('#ratingWorkload').value),ratingContent:Number($('#ratingContent').value),createdAt:serverTimestamp()}); e.target.reset(); $('#opinionDialog').close(); }
     catch(err){console.error(err);showNotice('تعذر النشر','تأكد من نشر قواعد Firestore الجديدة.');}
     finally{btn.disabled=false;btn.textContent='نشر الرأي';}
   });
@@ -159,9 +160,18 @@ function initUI() {
   $$('[data-close]').forEach(btn=>btn.onclick=()=>document.getElementById(btn.dataset.close)?.close());
 }
 
-initUI(); initForms();
+initUI(); initForms(); initCollegeSearch(); initCollegePage();
 onAuthStateChanged(auth, async user => {
   state.user=user;
-  if(user){await ensureUser(user); updateAuthUI(); fillProfile(); startPosts(); startOpinions();}
+  if(user){await ensureUser(user);updateAuthUI();fillProfile();startPosts();startOpinions();startCollegePosts();}
   else{state.profile=null;updateAuthUI(); if($('#profileContent')){$('#profileContent').hidden=true;$('#loginWall').hidden=false;} if($('#feed'))$('#feed').innerHTML='<p class="empty">سجّل الدخول لعرض الملفات.</p>';}
 });
+
+function initCollegeSearch(){const input=$('#collegeSearch');if(!input)return;input.addEventListener('input',()=>{const n=normalizeSearch(input.value);$$('.college-card').forEach(card=>card.hidden=n&&!normalizeSearch(card.textContent).includes(n));});}
+function collegeName(){return new URLSearchParams(location.search).get('name')||'';}
+function initCollegePage(){if(document.body.dataset.page!=='college')return;const name=collegeName();$('#collegeTitle').textContent=name||'الكلية';$$('[data-tab]').forEach(btn=>btn.onclick=()=>{$$('[data-tab]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');['community','news','resources'].forEach(x=>$('#'+x+'Tab').hidden=x!==btn.dataset.tab);if(btn.dataset.tab==='resources')renderCollegeResources();});$('#addCommunityBtn')?.addEventListener('click',()=>openCollegePost('community'));$('#addNewsBtn')?.addEventListener('click',()=>openCollegePost('news'));$('#collegeResourceSearch')?.addEventListener('input',renderCollegeResources);$('#collegePostForm')?.addEventListener('submit',publishCollegePost);}
+function openCollegePost(type){if(!requireLogin())return;$('#collegePostType').value=type;$('#collegePostTitle').textContent=type==='news'?'إضافة خبر':'إضافة منشور للمجتمع';$('#collegePostCategory').value=type==='news'?'خبر':'سؤال';$('#collegePostDialog').showModal();}
+async function publishCollegePost(e){e.preventDefault();if(!requireLogin())return;const btn=$('#publishCollegePost');btn.disabled=true;try{await addDoc(collection(db,'collegePosts'),{uid:state.user.uid,userName:state.profile?.name||state.user.displayName||'طالب',userPhoto:state.user.photoURL||'',college:collegeName(),type:$('#collegePostType').value,category:$('#collegePostCategory').value,heading:$('#collegePostHeading').value.trim(),text:$('#collegePostText').value.trim(),createdAt:serverTimestamp()});e.target.reset();$('#collegePostDialog').close();}catch(err){console.error(err);showNotice('تعذر النشر','تأكد من نشر قواعد Firestore الجديدة.');}finally{btn.disabled=false;}}
+function startCollegePosts(){if(!$('#communityFeed'))return;state.collegeUnsubscribe?.();state.collegeUnsubscribe=onSnapshot(query(collection(db,'collegePosts'),orderBy('createdAt','desc'),limit(300)),snap=>{state.collegePosts=snap.docs.map(d=>({id:d.id,...d.data()}));renderCollegePosts();renderCollegeResources();},err=>{console.error(err);$('#communityFeed').innerHTML='<p class="empty">تعذر تحميل مجتمع الكلية.</p>';});}
+function renderCollegePosts(){const name=collegeName();['community','news'].forEach(type=>{const feed=$('#'+type+'Feed');if(!feed)return;const items=state.collegePosts.filter(p=>p.college===name&&p.type===type);feed.innerHTML=items.length?items.map(p=>`<article class="resource-card"><div class="resource-top"><span class="pill">${escapeHTML(p.category||'منشور')}</span><span>${formatDate(p.createdAt)}</span></div><h3>${escapeHTML(p.heading||'')}</h3><p class="description">${escapeHTML(p.text||'')}</p><div class="author"><img class="avatar" src="${escapeHTML(p.userPhoto||fallbackAvatar)}"><div><strong>${escapeHTML(p.userName||'طالب')}</strong><small>${escapeHTML(p.college||'')}</small></div></div>${p.uid===state.user?.uid?`<button class="danger-btn" data-college-delete="${p.id}">حذف</button>`:''}</article>`).join(''):'<p class="empty">لا توجد منشورات بعد.</p>';});$$('[data-college-delete]').forEach(btn=>btn.onclick=async()=>{if(confirm('حذف هذا المنشور؟'))await deleteDoc(doc(db,'collegePosts',btn.dataset.collegeDelete));});}
+function renderCollegeResources(){const box=$('#collegeResources');if(!box)return;const name=collegeName(),n=normalizeSearch($('#collegeResourceSearch')?.value||'');const posts=state.posts.filter(p=>p.college===name&&(!n||normalizeSearch(`${p.title} ${p.course} ${p.description}`).includes(n)));const opinions=state.opinions.filter(o=>o.college===name&&(!n||normalizeSearch(`${o.course} ${o.code} ${o.text}`).includes(n)));const cards=[...posts.map(p=>`<article class="resource-card"><span class="pill">${escapeHTML(p.category||'ملف')}</span><h3>${escapeHTML(p.title||'')}</h3><p class="course">${escapeHTML(p.course||'')}</p><a class="open-link" href="${escapeHTML(p.driveUrl||'#')}" target="_blank">فتح الملف</a></article>`),...opinions.map(o=>`<article class="resource-card"><span class="pill">رأي طالب</span><h3>${escapeHTML(o.course||'')}</h3><p class="course">${escapeHTML(o.code||'')}</p><p class="description">${escapeHTML(o.text||'')}</p></article>`)];box.innerHTML=cards.length?cards.join(''):'<p class="empty">لا توجد موارد مرتبطة بهذه الكلية حاليًا.</p>';}
