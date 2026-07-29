@@ -1,32 +1,17 @@
-# SQU Drive Hub — النسخة النظيفة
+# أنجز
 
-هذه النسخة أُعيد بناؤها من الصفر، وحُذفت منها ميزات الأمس المعقدة.
-
-## الموجود
+منصة طلابية منظمة تحتوي على:
 - تسجيل الدخول بحساب Google.
-- ملف شخصي لكل مستخدم: الاسم، الكلية، التخصص، والنبذة.
-- صفحة مستقلة لكل قسم.
-- إضافة رابط Google Drive فقط.
-- حذف المستخدم لملفه الذي أضافه.
-- بحث داخل كل قسم.
+- ملف شخصي لكل مستخدم.
+- صفحة مستقلة لكل كلية من الكليات التسع.
+- تجميع الملفات تلقائيًا داخل صفحات المواد.
+- مجتمع نصي مستقل لكل كلية بدون إعجابات أو تعليقات.
+- بحث ذكي في الملفات.
+- فتح ملفات Google Drive مباشرة.
 - تصميم متجاوب ووضع ليلي.
 
-## الصفحات
-- index.html
-- summaries.html
-- lectures.html
-- exams.html
-- assignments.html
-- projects.html
-- other.html
-- profile.html
-
-## تشغيل المشروع
-1. ارفع جميع الملفات إلى جذر مستودع GitHub.
-2. فعّل GitHub Pages من الفرع main والجذر `/`.
-3. في Firebase Authentication > Settings > Authorized domains أضف نطاق GitHub Pages، مثل:
-   `dralrumhi-tech.github.io`
-4. في Firestore Database > Rules امسح كل الموجود والصق محتوى `firestore.rules` ثم اضغط Publish.
-
-## مهم
-لا تضع كود firebase-config.js داخل Firestore Rules. ملف القواعد يقبل فقط محتوى firestore.rules.
+## التشغيل
+1. ارفع الملفات إلى جذر مستودع GitHub Pages.
+2. انسخ محتوى `firestore.rules` إلى Firebase > Firestore > Rules ثم اضغط Publish.
+3. أضف نطاق GitHub Pages إلى Firebase Authentication > Settings > Authorized domains.
+4. اجعل روابط Google Drive بصلاحية Anyone with the link > Viewer.

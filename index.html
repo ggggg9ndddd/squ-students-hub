@@ -1,6 +1,19 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#15483f"><title>SQU Drive Hub</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body data-page="home"><header class="topbar">
-  <a class="brand" href="index.html"><span class="mark">S</span><span class="brand-text"><strong>SQU Drive Hub</strong><small>منصة طلابية مستقلة</small></span></a>
-  <nav class="nav"><a href="index.html" class="active">الرئيسية</a><a href="summaries.html" class="">الملخصات</a><a href="lectures.html" class="">المحاضرات</a><a href="exams.html" class="">الاختبارات</a><a href="assignments.html" class="">الواجبات</a><a href="projects.html" class="">المشاريع</a><a href="other.html" class="">أخرى</a><a href="profile.html" class="">ملفي الشخصي</a></nav>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0f4c45">
+  <title>أنجز</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="home">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">أ</span><strong>أنجز</strong></a>
+  <nav class="nav"><a class="active" href="index.html">الرئيسية</a><a href="profile.html">ملفي الشخصي</a></nav>
   <div class="top-actions">
     <button id="themeToggle" class="icon-btn" aria-label="تغيير المظهر">☾</button>
     <button id="googleLogin" class="primary-btn">تسجيل الدخول</button>
@@ -10,25 +23,35 @@
       <button id="logoutButton" class="ghost-btn">خروج</button>
     </div>
   </div>
-</header><main class="shell">
-<section class="hero"><div><span class="eyebrow">نسخة جديدة ونظيفة</span><h1>كل قسم في صفحة،<br>وكل مستخدم له ملف شخصي</h1><p>سجّل الدخول بحساب Google، أكمل ملفك الشخصي، ثم شارك روابط Google Drive داخل القسم المناسب دون رفع ملفات داخل الموقع.</p><div class="hero-actions"><button id="heroAddPost" class="primary-btn">إضافة ملف</button><a class="secondary-btn" href="profile.html" style="text-decoration:none">ملفي الشخصي</a></div></div><div class="hero-panel"><span>منصة مرتبة وبسيطة</span><strong>لا تعليقات، لا إعجابات، لا ستوريات</strong><small>ملفات دراسية فقط عبر Google Drive</small></div></section>
-<section class="section-head"><div><span class="eyebrow">الأقسام</span><h2>اختر القسم المناسب</h2></div></section>
-<section class="grid">
-<a class="category-card" href="summaries.html"><span class="category-icon">📘</span><h3>الملخصات</h3><p>ملخصات المواد والفصول.</p></a>
-<a class="category-card" href="lectures.html"><span class="category-icon">🎓</span><h3>المحاضرات</h3><p>العروض والمحاضرات الدراسية.</p></a>
-<a class="category-card" href="exams.html"><span class="category-icon">📝</span><h3>الاختبارات السابقة</h3><p>نماذج للمراجعة والتدريب.</p></a>
-<a class="category-card" href="assignments.html"><span class="category-icon">📄</span><h3>الواجبات</h3><p>نماذج ومصادر مساعدة.</p></a>
-<a class="category-card" href="projects.html"><span class="category-icon">🧩</span><h3>المشاريع</h3><p>مشاريع طلابية وملفاتها.</p></a>
-<a class="category-card" href="other.html"><span class="category-icon">📁</span><h3>أخرى</h3><p>ملفات دراسية متنوعة.</p></a>
-</section></main><footer class="footer"><strong>SQU Drive Hub</strong><span>منصة طلابية مستقلة وغير تابعة لجامعة السلطان قابوس.</span></footer><dialog id="postDialog"><form id="postForm" class="modal">
-  <button type="button" class="close" data-close="postDialog">×</button>
-  <span class="eyebrow">مشاركة ملف</span><h2>إضافة رابط Google Drive</h2>
-  <label class="field">عنوان الملف<input id="postTitle" maxlength="90" required placeholder="مثال: ملخص الفصل السابع"></label>
-  <label class="field">القسم<select id="postCategory" required><option value="">اختر القسم</option><option>ملخص</option><option>محاضرات</option><option>اختبارات سابقة</option><option>واجبات</option><option>مشروع</option><option>أخرى</option></select></label>
-  <label class="field">اسم المادة<input id="postCourse" maxlength="70" required placeholder="مثال: اقتصاديات الموارد الطبيعية"></label>
-  <label class="field">رابط Google Drive<input id="postLink" type="url" required placeholder="https://drive.google.com/..."></label>
-  <label class="field">الوصف<textarea id="postDescription" maxlength="500" required placeholder="اكتب وصفًا مختصرًا"></textarea></label>
-  <p class="tip">قبل النشر اجعل صلاحية الرابط: Anyone with the link → Viewer.</p>
-  <button id="publishPost" class="primary-btn full" type="submit">نشر الملف</button>
-</form></dialog>
-<dialog id="noticeDialog"><div class="modal notice"><button type="button" class="close" data-close="noticeDialog">×</button><h2 id="noticeTitle">تنبيه</h2><p id="noticeText"></p><button class="primary-btn full" data-close="noticeDialog">حسنًا</button></div></dialog><script type="module" src="app.js"></script></body></html>
+</header>
+
+<main class="shell">
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">مساحة طلابية منظمة</span>
+      <h1>كل كلية، موادها، ملفاتها، ومجتمعها في مكان واحد.</h1>
+      <p>سجّل الدخول، اختر كليتك، شارك رابط Google Drive، وابحث عن المواد والملفات بسهولة.</p>
+      <div class="hero-actions"><a class="primary-btn link-btn" href="#colleges">استعراض الكليات</a><a class="secondary-btn link-btn" href="profile.html">ملفي الشخصي</a></div>
+    </div>
+    <div class="hero-card">
+      <div class="mini-stat"><span>9</span><small>كليات</small></div>
+      <div class="mini-stat"><span>∞</span><small>مواد وملفات</small></div>
+      <div class="mini-stat"><span>1</span><small>مجتمع منظم</small></div>
+    </div>
+  </section>
+
+  <section class="search-panel">
+    <div><span class="eyebrow">البحث الذكي</span><h2>ابحث في جميع الملفات</h2></div>
+    <div class="search-row"><input id="globalSearch" type="search" placeholder="اسم المادة، الملف، الكلية أو صاحب الملف..."><button id="clearSearch" class="ghost-btn">مسح</button></div>
+  </section>
+  <section id="globalResults" class="resource-grid" hidden></section>
+
+  <section id="colleges" class="section-head"><div><span class="eyebrow">الكليات</span><h2>اختر كليتك</h2></div></section>
+  <section id="collegeGrid" class="college-grid"></section>
+</main>
+
+<footer class="footer"><strong>أنجز</strong><span>مساحة طلابية لمشاركة المعرفة.</span></footer>
+<dialog id="noticeDialog"><div class="modal notice"><button type="button" class="close" data-close="noticeDialog">×</button><h2 id="noticeTitle">تنبيه</h2><p id="noticeText"></p><button class="primary-btn full" data-close="noticeDialog">حسنًا</button></div></dialog>
+<script type="module" src="app.js"></script>
+</body>
+</html>
