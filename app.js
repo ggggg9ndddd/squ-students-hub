@@ -1,58 +1,140 @@
 import { auth, db, googleProvider } from './firebase-config.js';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
-import { addDoc, collection, deleteDoc, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, where } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+import { addDoc, collection, deleteDoc, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
-const $ = s => document.querySelector(s);
-const $$ = s => [...document.querySelectorAll(s)];
-const colleges = [
-  {id:'agriculture',name:'كلية العلوم الزراعية والبحرية',icon:'🌿'},
-  {id:'arts',name:'كلية الآداب والعلوم الاجتماعية',icon:'📚'},
-  {id:'economics',name:'كلية الاقتصاد والعلوم السياسية',icon:'📊'},
-  {id:'education',name:'كلية التربية',icon:'🎓'},
-  {id:'engineering',name:'كلية الهندسة',icon:'⚙️'},
-  {id:'law',name:'كلية الحقوق',icon:'⚖️'},
-  {id:'medicine',name:'كلية الطب والعلوم الصحية',icon:'🩺'},
-  {id:'nursing',name:'كلية التمريض',icon:'🧑‍⚕️'},
-  {id:'science',name:'كلية العلوم',icon:'🔬'}
-];
-const state = {user:null, profile:null, resources:[], community:[], unsubResources:null, unsubCommunity:null};
-const fallbackAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='60' fill='%230f4c45'/%3E%3Ctext x='60' y='76' text-anchor='middle' font-size='52'%3E👤%3C/text%3E%3C/svg%3E";
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+const state = { user: null, profile: null, posts: [], unsubscribe: null };
+const fallbackAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='60' fill='%2315483f'/%3E%3Ctext x='60' y='76' text-anchor='middle' font-size='52'%3E👤%3C/text%3E%3C/svg%3E";
 
-function escapeHTML(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-function showNotice(title,text){if(!$('#noticeDialog'))return alert(text);$('#noticeTitle').textContent=title;$('#noticeText').textContent=text;$('#noticeDialog').showModal();}
-function formatDate(ts){return ts?.toDate?new Intl.DateTimeFormat('ar-OM',{day:'numeric',month:'short',year:'numeric'}).format(ts.toDate()):'الآن';}
-function validDriveUrl(value){try{const u=new URL(value);return u.protocol==='https:'&&['drive.google.com','docs.google.com'].includes(u.hostname);}catch{return false;}}
-function requireLogin(){if(state.user)return true;showNotice('تسجيل الدخول مطلوب','سجّل الدخول بحساب Google أولًا.');return false;}
-function currentCollege(){const id=new URLSearchParams(location.search).get('id');return colleges.find(c=>c.id===id)||colleges[0];}
+function escapeHTML(value='') { return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+function showNotice(title, text) { if (!$('#noticeDialog')) return alert(text); $('#noticeTitle').textContent = title; $('#noticeText').textContent = text; $('#noticeDialog').showModal(); }
+function formatDate(ts) { return ts?.toDate ? new Intl.DateTimeFormat('ar-OM',{day:'numeric',month:'long',year:'numeric'}).format(ts.toDate()) : 'الآن'; }
+function validDriveUrl(value) { try { const u = new URL(value); return u.protocol === 'https:' && ['drive.google.com','docs.google.com'].includes(u.hostname); } catch { return false; } }
+function requireLogin() { if (state.user) return true; showNotice('تسجيل الدخول مطلوب','سجّل الدخول بحساب Google أولًا.'); return false; }
 
-async function ensureUser(user){const ref=doc(db,'users',user.uid);const snap=await getDoc(ref);const old=snap.exists()?snap.data():{};const data={uid:user.uid,name:old.name||user.displayName||'مستخدم',email:user.email||'',photoURL:user.photoURL||'',college:old.college||'',major:old.major||'',bio:old.bio||'',lastSeen:serverTimestamp()};await setDoc(ref,data,{merge:true});state.profile={...old,...data};}
-function updateAuthUI(){const login=$('#googleLogin'),menu=$('#userMenu');if(!login||!menu)return;if(state.user){login.hidden=true;menu.hidden=false;$('#userPhoto').src=state.user.photoURL||fallbackAvatar;$('#userName').textContent=state.profile?.name||state.user.displayName||'مستخدم';$('#userEmail').textContent=state.user.email||'';}else{login.hidden=false;menu.hidden=true;}}
-async function doLogin(){try{await signInWithPopup(auth,googleProvider);}catch(e){console.error(e);showNotice('تعذر تسجيل الدخول',e.code==='auth/unauthorized-domain'?'أضف نطاق GitHub Pages في Authorized domains داخل Firebase.':'أُغلقت نافذة الدخول أو تعذر الاتصال.');}}
-
-function initHome(){const grid=$('#collegeGrid');if(grid)grid.innerHTML=colleges.map(c=>`<a class="college-card" href="college.html?id=${c.id}"><span>${c.icon}</span><h3>${c.name}</h3><p>المواد والملفات ومجتمع الكلية</p><b>دخول الصفحة ←</b></a>`).join('');
- const input=$('#globalSearch');if(input){input.addEventListener('input',()=>renderGlobal(input.value));$('#clearSearch').onclick=()=>{input.value='';$('#globalResults').hidden=true;};startAllResources();}}
-function startAllResources(){state.unsubResources?.();state.unsubResources=onSnapshot(query(collection(db,'resources'),orderBy('createdAt','desc'),limit(300)),snap=>{state.resources=snap.docs.map(d=>({id:d.id,...d.data()}));if($('#globalSearch')?.value)renderGlobal($('#globalSearch').value);},e=>console.error(e));}
-function renderGlobal(term){const box=$('#globalResults');if(!box)return;term=term.trim().toLowerCase();if(!term){box.hidden=true;return;}const results=state.resources.filter(r=>`${r.title||''} ${r.course||''} ${r.description||''} ${r.userName||''} ${r.college||''} ${r.type||''}`.toLowerCase().includes(term));box.hidden=false;box.innerHTML=results.length?results.map(resourceCard).join(''):'<p class="empty">لا توجد نتائج مطابقة.</p>';}
-
-function initCollege(){const college=currentCollege();document.title=`${college.name} | أنجز`;$('#collegeTitle').textContent=college.name;$('#collegeIcon').textContent=college.icon;
- $$('.tab').forEach(btn=>btn.onclick=()=>{$$('.tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');$('#coursesPanel').hidden=btn.dataset.tab!=='courses';$('#communityPanel').hidden=btn.dataset.tab!=='community';});
- $('#addResourceBtn').onclick=()=>requireLogin()&&$('#resourceDialog').showModal();$('#addCommunityBtn').onclick=()=>requireLogin()&&$('#communityDialog').showModal();$('#collegeSearch').addEventListener('input',renderCollegeResources);
- $('#resourceForm').addEventListener('submit',async e=>{e.preventDefault();if(!requireLogin())return;const driveUrl=$('#resourceLink').value.trim();if(!validDriveUrl(driveUrl)){showNotice('رابط غير صحيح','استخدم رابط Google Drive أو Google Docs صالحًا.');return;}const btn=$('#saveResource');btn.disabled=true;try{await addDoc(collection(db,'resources'),{uid:state.user.uid,userName:state.profile?.name||state.user.displayName||'مستخدم',userPhoto:state.user.photoURL||'',college:college.name,collegeId:college.id,title:$('#resourceTitle').value.trim(),course:$('#resourceCourse').value.trim(),type:$('#resourceType').value,driveUrl,description:$('#resourceDescription').value.trim(),createdAt:serverTimestamp()});e.target.reset();$('#resourceDialog').close();}catch(err){console.error(err);showNotice('تعذر النشر','تأكد من نشر قواعد Firestore الصحيحة.');}finally{btn.disabled=false;}});
- $('#communityForm').addEventListener('submit',async e=>{e.preventDefault();if(!requireLogin())return;const btn=$('#saveCommunity');btn.disabled=true;try{await addDoc(collection(db,'communityPosts'),{uid:state.user.uid,userName:state.profile?.name||state.user.displayName||'مستخدم',userPhoto:state.user.photoURL||'',college:college.name,collegeId:college.id,title:$('#communityTitle').value.trim(),content:$('#communityContent').value.trim(),createdAt:serverTimestamp()});e.target.reset();$('#communityDialog').close();}catch(err){console.error(err);showNotice('تعذر النشر','تأكد من قواعد Firestore.');}finally{btn.disabled=false;}});
- startCollegeData(college.id);
+async function ensureUser(user) {
+  const ref = doc(db,'users',user.uid);
+  const snap = await getDoc(ref);
+  const current = snap.exists() ? snap.data() : {};
+  const data = {
+    uid:user.uid,
+    name:current.name || user.displayName || 'مستخدم',
+    email:user.email || '',
+    photoURL:user.photoURL || '',
+    college:current.college || '',
+    major:current.major || '',
+    bio:current.bio || '',
+    lastSeen:serverTimestamp()
+  };
+  await setDoc(ref,data,{merge:true});
+  state.profile = {...current,...data};
 }
-function startCollegeData(id){state.unsubResources?.();state.unsubCommunity?.();state.unsubResources=onSnapshot(query(collection(db,'resources'),where('collegeId','==',id)),snap=>{state.resources=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));renderCollegeResources();},e=>{$('#courseGroups').innerHTML='<p class="empty">تعذر تحميل الملفات. قد تحتاج إلى إنشاء فهرس Firestore من الرابط الذي يظهر في الخطأ.</p>';console.error(e);});state.unsubCommunity=onSnapshot(query(collection(db,'communityPosts'),where('collegeId','==',id)),snap=>{state.community=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));renderCommunity();},e=>console.error(e));}
-function renderCollegeResources(){const box=$('#courseGroups');if(!box)return;const term=($('#collegeSearch').value||'').trim().toLowerCase();const list=state.resources.filter(r=>!term||`${r.title||''} ${r.course||''} ${r.description||''} ${r.userName||''} ${r.type||''}`.toLowerCase().includes(term));if(!list.length){box.innerHTML='<p class="empty">لا توجد ملفات في هذه الكلية حاليًا.</p>';return;}const groups={};list.forEach(r=>(groups[r.course||'مواد أخرى']??=[]).push(r));box.innerHTML=Object.entries(groups).map(([course,items])=>`<section class="course-group"><div class="course-heading"><div><span class="eyebrow">مادة</span><h2>${escapeHTML(course)}</h2></div><span class="count-badge">${items.length} ملف</span></div><div class="resource-grid">${items.map(resourceCard).join('')}</div></section>`).join('');bindDeletes();}
-function resourceCard(r){return `<article class="resource-card"><div class="resource-top"><span class="pill">${escapeHTML(r.type||'ملف')}</span><span>${formatDate(r.createdAt)}</span></div><h3>${escapeHTML(r.title||'')}</h3><p class="description">${escapeHTML(r.description||'')}</p><div class="author"><img class="avatar" src="${escapeHTML(r.userPhoto||fallbackAvatar)}" alt=""><div><strong>${escapeHTML(r.userName||'مستخدم')}</strong><small>${escapeHTML(r.college||'')}</small></div></div><div class="resource-actions"><a class="open-link" href="${escapeHTML(r.driveUrl||'#')}" target="_blank" rel="noopener noreferrer">فتح الملف مباشرة ↗</a>${r.uid===state.user?.uid?`<button class="danger-btn" data-delete-resource="${r.id}">حذف</button>`:''}</div></article>`;}
-function renderCommunity(){const box=$('#communityFeed');if(!box)return;if(!state.community.length){box.innerHTML='<p class="empty">لا توجد مشاركات في المجتمع حتى الآن.</p>';return;}box.innerHTML=state.community.map(p=>`<article class="community-card"><div class="author"><img class="avatar" src="${escapeHTML(p.userPhoto||fallbackAvatar)}"><div><strong>${escapeHTML(p.userName||'مستخدم')}</strong><small>${formatDate(p.createdAt)}</small></div></div><h3>${escapeHTML(p.title||'')}</h3><p>${escapeHTML(p.content||'')}</p>${p.uid===state.user?.uid?`<button class="danger-btn" data-delete-community="${p.id}">حذف المشاركة</button>`:''}</article>`).join('');bindDeletes();}
-function bindDeletes(){$$('[data-delete-resource]').forEach(b=>b.onclick=async()=>{if(confirm('حذف هذا الملف؟'))await deleteDoc(doc(db,'resources',b.dataset.deleteResource));});$$('[data-delete-community]').forEach(b=>b.onclick=async()=>{if(confirm('حذف هذه المشاركة؟'))await deleteDoc(doc(db,'communityPosts',b.dataset.deleteCommunity));});}
 
-function initProfile(){const select=$('#profileCollege');select.innerHTML='<option value="">اختر الكلية</option>'+colleges.map(c=>`<option>${c.name}</option>`).join('');$('#profileLogin').onclick=doLogin;$('#profileForm').addEventListener('submit',async e=>{e.preventDefault();if(!requireLogin())return;const btn=$('#saveProfile');btn.disabled=true;const data={uid:state.user.uid,name:$('#profileName').value.trim(),email:state.user.email||'',photoURL:state.user.photoURL||'',college:$('#profileCollege').value,major:$('#profileMajor').value.trim(),bio:$('#profileBio').value.trim(),updatedAt:serverTimestamp()};try{await setDoc(doc(db,'users',state.user.uid),data,{merge:true});state.profile={...state.profile,...data};fillProfile();updateAuthUI();showNotice('تم الحفظ','تم تحديث ملفك الشخصي.');}catch(e){console.error(e);showNotice('تعذر الحفظ','تأكد من قواعد Firestore.');}finally{btn.disabled=false;}});}
-function fillProfile(){if(!$('#profileContent')||!state.user)return;$('#loginWall').hidden=true;$('#profileContent').hidden=false;$('#profileAvatar').src=state.user.photoURL||fallbackAvatar;$('#profileDisplayName').textContent=state.profile?.name||state.user.displayName||'مستخدم';$('#profileDisplayEmail').textContent=state.user.email||'';$('#profileName').value=state.profile?.name||state.user.displayName||'';$('#profileCollege').value=state.profile?.college||'';$('#profileMajor').value=state.profile?.major||'';$('#profileBio').value=state.profile?.bio||'';$('#metaCollege').textContent=state.profile?.college||'لم تُحدد';$('#metaMajor').textContent=state.profile?.major||'لم يُحدد';startMyResources();}
-function startMyResources(){state.unsubResources?.();state.unsubResources=onSnapshot(query(collection(db,'resources'),where('uid','==',state.user.uid)),snap=>{const list=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));$('#resourceCount').textContent=list.length;$('#myResources').innerHTML=list.length?list.map(resourceCard).join(''):'<p class="empty">لم تضف أي ملفات بعد.</p>';bindDeletes();},e=>console.error(e));}
+function updateAuthUI() {
+  const login = $('#googleLogin');
+  const menu = $('#userMenu');
+  if (!login || !menu) return;
+  if (state.user) {
+    login.hidden = true; menu.hidden = false;
+    $('#userPhoto').src = state.user.photoURL || fallbackAvatar;
+    $('#userName').textContent = state.profile?.name || state.user.displayName || 'مستخدم';
+    $('#userEmail').textContent = state.user.email || '';
+  } else {
+    login.hidden = false; menu.hidden = true;
+  }
+}
 
-function initUI(){$('#googleLogin')?.addEventListener('click',doLogin);$('#logoutButton')?.addEventListener('click',()=>signOut(auth));$('#themeToggle')?.addEventListener('click',()=>{document.body.classList.toggle('dark');localStorage.setItem('theme',document.body.classList.contains('dark')?'dark':'light');$('#themeToggle').textContent=document.body.classList.contains('dark')?'☀':'☾';});if(localStorage.getItem('theme')==='dark'){document.body.classList.add('dark');if($('#themeToggle'))$('#themeToggle').textContent='☀';}$$('[data-close]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.close)?.close());}
+function startPosts() {
+  if (!$('#feed')) return;
+  state.unsubscribe?.();
+  state.unsubscribe = onSnapshot(query(collection(db,'posts'),orderBy('createdAt','desc'),limit(200)), snap => {
+    state.posts = snap.docs.map(d => ({id:d.id,...d.data()}));
+    renderPosts();
+  }, err => {
+    console.error(err);
+    $('#feed').innerHTML = '<p class="empty">تعذر تحميل الملفات. تأكد من نشر قواعد Firestore الصحيحة.</p>';
+  });
+}
 
-initUI();
-const page=document.body.dataset.page;if(page==='home')initHome();if(page==='college')initCollege();if(page==='profile')initProfile();
-onAuthStateChanged(auth,async user=>{state.user=user;if(user){await ensureUser(user);updateAuthUI();if(page==='profile')fillProfile();if(page==='home'&&!state.unsubResources)startAllResources();}else{state.profile=null;updateAuthUI();if(page==='profile'){$('#profileContent').hidden=true;$('#loginWall').hidden=false;}if(page==='home'){$('#globalResults').hidden=true;}}});
+function renderPosts() {
+  const feed = $('#feed'); if (!feed) return;
+  const pageCategory = document.body.dataset.category || '';
+  const term = ($('#searchInput')?.value || '').trim().toLowerCase();
+  let posts = state.posts.filter(p => !pageCategory || p.category === pageCategory);
+  if (document.body.dataset.page === 'profile') posts = posts.filter(p => p.uid === state.user?.uid);
+  if (term) posts = posts.filter(p => `${p.title||''} ${p.course||''} ${p.description||''} ${p.userName||''}`.toLowerCase().includes(term));
+  if (!posts.length) { feed.innerHTML = '<p class="empty">لا توجد ملفات في هذا القسم حاليًا.</p>'; return; }
+  feed.innerHTML = posts.map(p => `<article class="resource-card">
+    <div class="resource-top"><span class="pill">${escapeHTML(p.category || 'ملف')}</span><span>${formatDate(p.createdAt)}</span></div>
+    <p class="course">${escapeHTML(p.course || '')}</p>
+    <h3>${escapeHTML(p.title || '')}</h3>
+    <p class="description">${escapeHTML(p.description || '')}</p>
+    <div class="author"><img class="avatar" src="${escapeHTML(p.userPhoto || fallbackAvatar)}" alt=""><div><strong>${escapeHTML(p.userName || 'مستخدم')}</strong><small>${escapeHTML(p.userCollege || '')}</small></div></div>
+    <div class="resource-actions"><a class="open-link" href="${escapeHTML(p.driveUrl || '#')}" target="_blank" rel="noopener noreferrer">فتح رابط Google Drive</a>${p.uid === state.user?.uid ? `<button class="danger-btn" data-delete="${p.id}">حذف</button>` : ''}</div>
+  </article>`).join('');
+  $$('[data-delete]').forEach(btn => btn.onclick = async () => {
+    if (!confirm('هل تريد حذف هذا الملف؟')) return;
+    try { await deleteDoc(doc(db,'posts',btn.dataset.delete)); }
+    catch(e) { console.error(e); showNotice('تعذر الحذف','لا يمكنك حذف ملف لا تملكه.'); }
+  });
+}
+
+function initForms() {
+  $('#postForm')?.addEventListener('submit', async e => {
+    e.preventDefault(); if (!requireLogin()) return;
+    const title=$('#postTitle').value.trim(), course=$('#postCourse').value.trim(), category=$('#postCategory').value, driveUrl=$('#postLink').value.trim(), description=$('#postDescription').value.trim();
+    if (!validDriveUrl(driveUrl)) { showNotice('رابط غير صحيح','ضع رابطًا صحيحًا من Google Drive أو Google Docs.'); return; }
+    const btn=$('#publishPost'); btn.disabled=true; btn.textContent='جارٍ النشر…';
+    try {
+      await addDoc(collection(db,'posts'),{uid:state.user.uid,userName:state.profile?.name || state.user.displayName || 'مستخدم',userPhoto:state.user.photoURL || '',userCollege:state.profile?.college || '',title,course,category,driveUrl,description,createdAt:serverTimestamp()});
+      e.target.reset(); $('#postDialog').close();
+    } catch(err) { console.error(err); showNotice('تعذر النشر','تأكد من نشر قواعد Firestore ثم حاول مرة أخرى.'); }
+    finally { btn.disabled=false; btn.textContent='نشر الملف'; }
+  });
+
+  $('#profileForm')?.addEventListener('submit', async e => {
+    e.preventDefault(); if (!requireLogin()) return;
+    const btn=$('#saveProfile'); btn.disabled=true; btn.textContent='جارٍ الحفظ…';
+    const profile={uid:state.user.uid,name:$('#profileName').value.trim(),email:state.user.email || '',photoURL:state.user.photoURL || '',college:$('#profileCollege').value.trim(),major:$('#profileMajor').value.trim(),bio:$('#profileBio').value.trim(),updatedAt:serverTimestamp()};
+    try { await setDoc(doc(db,'users',state.user.uid),profile,{merge:true}); state.profile={...state.profile,...profile}; fillProfile(); updateAuthUI(); showNotice('تم الحفظ','تم تحديث ملفك الشخصي بنجاح.'); }
+    catch(err){ console.error(err); showNotice('تعذر الحفظ','تأكد من قواعد Firestore.'); }
+    finally { btn.disabled=false; btn.textContent='حفظ التغييرات'; }
+  });
+}
+
+function fillProfile() {
+  if (!$('#profileForm') || !state.user) return;
+  $('#profileAvatar').src = state.user.photoURL || fallbackAvatar;
+  $('#profileDisplayName').textContent = state.profile?.name || state.user.displayName || 'مستخدم';
+  $('#profileDisplayEmail').textContent = state.user.email || '';
+  $('#profileName').value = state.profile?.name || state.user.displayName || '';
+  $('#profileCollege').value = state.profile?.college || '';
+  $('#profileMajor').value = state.profile?.major || '';
+  $('#profileBio').value = state.profile?.bio || '';
+  $('#metaCollege').textContent = state.profile?.college || 'لم تُحدّد الكلية';
+  $('#metaMajor').textContent = state.profile?.major || 'لم يُحدّد التخصص';
+  $('#loginWall')?.setAttribute('hidden','');
+  $('#profileContent')?.removeAttribute('hidden');
+}
+
+function initUI() {
+  $('#googleLogin')?.addEventListener('click', async () => {
+    try { await signInWithPopup(auth,googleProvider); }
+    catch(err) { console.error(err); showNotice('تعذر تسجيل الدخول', err.code === 'auth/unauthorized-domain' ? 'أضف نطاق GitHub Pages في Authorized domains داخل Firebase.' : 'أُغلقت نافذة الدخول أو تعذر الاتصال.'); }
+  });
+  $('#logoutButton')?.addEventListener('click',()=>signOut(auth));
+  $('#addPostBtn')?.addEventListener('click',()=>requireLogin() && $('#postDialog').showModal());
+  $('#heroAddPost')?.addEventListener('click',()=>requireLogin() && $('#postDialog').showModal());
+  $('#searchInput')?.addEventListener('input',renderPosts);
+  $('#themeToggle')?.addEventListener('click',()=>{document.body.classList.toggle('dark');localStorage.setItem('theme',document.body.classList.contains('dark')?'dark':'light');$('#themeToggle').textContent=document.body.classList.contains('dark')?'☀':'☾';});
+  if(localStorage.getItem('theme')==='dark'){document.body.classList.add('dark');if($('#themeToggle'))$('#themeToggle').textContent='☀';}
+  $$('[data-close]').forEach(btn=>btn.onclick=()=>document.getElementById(btn.dataset.close)?.close());
+}
+
+initUI(); initForms();
+onAuthStateChanged(auth, async user => {
+  state.user=user;
+  if(user){await ensureUser(user); updateAuthUI(); fillProfile(); startPosts();}
+  else{state.profile=null;updateAuthUI(); if($('#profileContent')){$('#profileContent').hidden=true;$('#loginWall').hidden=false;} if($('#feed'))$('#feed').innerHTML='<p class="empty">سجّل الدخول لعرض الملفات.</p>';}
+});
