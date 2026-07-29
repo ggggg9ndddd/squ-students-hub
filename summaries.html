@@ -1,6 +1,6 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#15483f"><title>الملخصات | SQU Drive Hub</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body data-page="category" data-category="ملخص"><header class="topbar">
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#15483f"><title>الملخصات | SQU Drive Hub</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body data-page="summaries" data-category="ملخص"><header class="topbar">
   <a class="brand" href="index.html"><span class="mark">S</span><span class="brand-text"><strong>SQU Drive Hub</strong><small>منصة طلابية مستقلة</small></span></a>
-  <nav class="nav"><a href="index.html" class="">الرئيسية</a><a href="summaries.html" class="active">الملخصات</a><a href="lectures.html" class="">المحاضرات</a><a href="exams.html" class="">الاختبارات</a><a href="assignments.html" class="">الواجبات</a><a href="projects.html" class="">المشاريع</a><a href="other.html" class="">أخرى</a><a href="profile.html" class="">ملفي الشخصي</a></nav>
+  <nav class="nav"><a href="index.html" class="">الرئيسية</a><a href="summaries.html" class="active">الملخصات</a><a href="lectures.html" class="">آراء الطلاب</a><a href="exams.html" class="">توليد الجدول</a><a href="assignments.html" class="">الواجبات</a><a href="projects.html" class="">المشاريع</a><a href="other.html" class="">أخرى</a><a href="profile.html" class="">ملفي الشخصي</a></nav>
   <div class="top-actions">
     <button id="themeToggle" class="icon-btn" aria-label="تغيير المظهر">☾</button>
     <button id="googleLogin" class="primary-btn">تسجيل الدخول</button>
@@ -10,15 +10,16 @@
       <button id="logoutButton" class="ghost-btn">خروج</button>
     </div>
   </div>
-</header><main class="shell"><section class="section-head" style="padding-top:55px"><div><span class="eyebrow">قسم مستقل</span><h2>الملخصات</h2><p style="color:var(--muted)">ملخصات المواد مرتبة وسهلة الوصول.</p></div><div class="toolbar"><label class="search">⌕<input id="searchInput" type="search" placeholder="ابحث في هذا القسم…"></label><button id="addPostBtn" class="primary-btn">+ إضافة ملف</button></div></section><section id="feed" class="grid"><p class="loading">سجّل الدخول لعرض الملفات.</p></section></main><footer class="footer"><strong>SQU Drive Hub</strong><span>منصة طلابية مستقلة وغير تابعة لجامعة السلطان قابوس.</span></footer><dialog id="postDialog"><form id="postForm" class="modal">
+</header><main class="shell"><section class="section-head" style="padding-top:55px"><div><span class="eyebrow">قسم الملخصات</span><h2>الملخصات</h2><p style="color:var(--muted)">شارك ملخصات المواد مع اسم الملف ورمز المادة والكلية.</p></div><div class="toolbar"><label class="search">⌕<input id="searchInput" type="search" placeholder="ابحث باسم الملف أو رمز المادة أو الكلية…"></label><button id="addPostBtn" class="primary-btn">+ إضافة ملخص</button></div></section><section id="feed" class="grid"><p class="loading">سجّل الدخول لعرض الملفات.</p></section></main><footer class="footer"><strong>SQU Drive Hub</strong><span>منصة طلابية مستقلة وغير تابعة لجامعة السلطان قابوس.</span></footer><dialog id="postDialog"><form id="postForm" class="modal">
   <button type="button" class="close" data-close="postDialog">×</button>
-  <span class="eyebrow">مشاركة ملف</span><h2>إضافة رابط Google Drive</h2>
-  <label class="field">عنوان الملف<input id="postTitle" maxlength="90" required placeholder="مثال: ملخص الفصل السابع"></label>
-  <label class="field">القسم<select id="postCategory" required><option value="">اختر القسم</option><option>ملخص</option><option>محاضرات</option><option>اختبارات سابقة</option><option>واجبات</option><option>مشروع</option><option>أخرى</option></select></label>
-  <label class="field">اسم المادة<input id="postCourse" maxlength="70" required placeholder="مثال: اقتصاديات الموارد الطبيعية"></label>
-  <label class="field">رابط Google Drive<input id="postLink" type="url" required placeholder="https://drive.google.com/..."></label>
-  <label class="field">الوصف<textarea id="postDescription" maxlength="500" required placeholder="اكتب وصفًا مختصرًا"></textarea></label>
+  <span class="eyebrow">مشاركة ملخص</span><h2>إضافة ملخص جديد</h2>
+  <input id="postCategory" type="hidden" value="ملخص">
+  <label class="field">اسم الملف<input id="postTitle" maxlength="90" required placeholder="مثال: ملخص الفصل السابع"></label>
+  <label class="field">رمز المادة<input id="postCourse" maxlength="30" required placeholder="مثال: CAMS 2003"></label>
+  <label class="field">الكلية<select id="postCollege" required><option value="">اختر الكلية</option><option>كلية العلوم الزراعية والبحرية</option><option>كلية الآداب والعلوم الاجتماعية</option><option>كلية الاقتصاد والعلوم السياسية</option><option>كلية التربية</option><option>كلية الهندسة</option><option>كلية الحقوق</option><option>كلية الطب والعلوم الصحية</option><option>كلية التمريض</option><option>كلية العلوم</option></select></label>
+  <label class="field">رابط الملف<input id="postLink" type="url" required placeholder="https://drive.google.com/..."></label>
+  <input id="postDescription" type="hidden" value="">
   <p class="tip">قبل النشر اجعل صلاحية الرابط: Anyone with the link → Viewer.</p>
-  <button id="publishPost" class="primary-btn full" type="submit">نشر الملف</button>
+  <button id="publishPost" class="primary-btn full" type="submit">نشر الملخص</button>
 </form></dialog>
 <dialog id="noticeDialog"><div class="modal notice"><button type="button" class="close" data-close="noticeDialog">×</button><h2 id="noticeTitle">تنبيه</h2><p id="noticeText"></p><button class="primary-btn full" data-close="noticeDialog">حسنًا</button></div></dialog><script type="module" src="app.js"></script></body></html>
