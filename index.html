@@ -1,6 +1,6 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#15483f"><title>SQU Drive Hub</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body data-page="home"><header class="topbar">
-  <a class="brand" href="index.html"><span class="mark">S</span><span class="brand-text"><strong>SQU Drive Hub</strong><small>منصة طلابية مستقلة</small></span></a>
-  <nav class="nav"><a href="index.html" class="active">الرئيسية</a><a href="summaries.html" class="">الملخصات</a><a href="lectures.html" class="">آراء الطلاب</a><a href="exams.html" class="">توليد الجدول</a><a href="colleges.html" class="">الكليات</a><a href="ai.html" class="">المساعد الذكي</a><a href="projects.html" class="">المشاريع</a><a href="other.html" class="">أخرى</a><a href="profile.html" class="">ملفي الشخصي</a></nav>
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f7f7f5"><title>أنجز</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body data-page="home"><header class="topbar">
+  <a class="brand" href="index.html"><span class="mark">أ</span><span class="brand-text"><strong>أنجز</strong><small>منصة طلابية مستقلة</small></span></a>
+  <nav class="nav"><a href="index.html" class="active">الرئيسية</a><a href="summaries.html" class="">الملخصات</a><a href="lectures.html" class="">آراء الطلاب</a><a href="exams.html" class="">توليد الجدول</a><a href="colleges.html" class="">الكليات</a><a href="projects.html" class="">المشاريع</a><a href="other.html" class="">أخرى</a><a href="profile.html" class="">ملفي الشخصي</a></nav>
   <div class="top-actions">
     <button id="themeToggle" class="icon-btn" aria-label="تغيير المظهر">☾</button>
     <button id="googleLogin" class="primary-btn">تسجيل الدخول</button>
@@ -11,16 +11,57 @@
     </div>
   </div>
 </header><main class="shell">
-<section class="hero"><div><span class="eyebrow">مشاركة أسهل، وصول أسرع</span><h1>شارك ملفاتك الدراسية...<br>وساعد غيرك على الوصول إليها</h1><p>منصة تجمع الملخصات وآراء الطلاب وأداة توليد الجدول والكليات والمساعد الدراسي الذكي في مكان واحد. أضف رابط Google Drive الخاص بك، وسيصبح متاحًا للطلاب داخل القسم المناسب.</p><div class="hero-actions"><button id="heroAddPost" class="primary-btn">ابدأ بإضافة ملف</button><a class="secondary-btn" href="profile.html" style="text-decoration:none">ملفي الشخصي</a></div></div><div class="hero-panel"><span>منصة تعليمية بسيطة ومنظمة</span><strong>ملخصات، آراء طلاب، جداول دراسية ومساعد ذكي</strong><small>شارك الملفات بسهولة عبر Google Drive</small></div></section>
-<section class="section-head"><div><span class="eyebrow">الأقسام</span><h2>اختر القسم المناسب</h2></div></section>
-<section class="grid">
-<a class="category-card" href="summaries.html"><span class="category-icon">📘</span><h3>الملخصات</h3><p>ملخصات المواد والفصول.</p></a>
-<a class="category-card" href="lectures.html"><span class="category-icon">🎓</span><h3>آراء الطلاب في المواد</h3><p>تجارب ووصف مفيد للمواد.</p></a>
-<a class="category-card" href="exams.html"><span class="category-icon">📝</span><h3>توليد جدول دراسي</h3><p>أنشئ جدولك واكتشف التعارضات.</p></a>
-<a class="category-card" href="colleges.html"><span class="category-icon">🏛️</span><h3>الكليات</h3><p>مجتمعات الكليات التسع وآخر أخبارها.</p></a><a class="category-card ai-category" href="ai.html"><span class="category-icon">🤖</span><h3>المساعد الدراسي الذكي</h3><p>اشرح ولخّص وأنشئ أسئلة وخطة مذاكرة من النصوص.</p></a>
-<a class="category-card" href="projects.html"><span class="category-icon">🧩</span><h3>المشاريع</h3><p>مشاريع طلابية وملفاتها.</p></a>
-<a class="category-card" href="other.html"><span class="category-icon">📁</span><h3>أخرى</h3><p>ملفات دراسية متنوعة.</p></a>
-</section></main><footer class="footer"><strong>SQU Drive Hub</strong><span>منصة طلابية مستقلة وغير تابعة لجامعة السلطان قابوس.</span></footer><dialog id="postDialog"><form id="postForm" class="modal">
+<section class="hero editorial-hero">
+  <div class="hero-copy">
+    <span class="eyebrow">مساحة طلابية، مصممة ببساطة</span>
+    <h1>كل ما تحتاجه للدراسة،<br><em>في مكان واحد واضح.</em></h1>
+    <p>شارك الملخصات عبر Google Drive، اقرأ تجارب الطلاب، أنشئ جدولك الدراسي، وتواصل داخل مجتمع كليتك.</p>
+    <div class="hero-actions">
+      <button id="heroAddPost" class="primary-btn">إضافة ملف</button>
+      <a class="secondary-btn" href="profile.html">ملفي الشخصي</a>
+    </div>
+  </div>
+  <aside class="hero-panel editorial-panel">
+    <div class="panel-kicker">منصة مستقلة</div>
+    <h2>مصممة للطالب<br>وللطالب فقط.</h2>
+    <div class="feature-strip">
+      <span><b>09</b> كليات</span>
+      <span><b>Drive</b> مشاركة مباشرة</span>
+      <span><b>Smart</b> بحث مرن</span>
+    </div>
+  </aside>
+</section>
+
+<section class="section-head home-heading">
+  <div><span class="eyebrow">الخدمات</span><h2>اختر ما تحتاجه الآن</h2><p>كل قسم له هويته، ووظيفته، ومساره الواضح.</p></div>
+</section>
+<section class="grid editorial-grid">
+  <a class="category-card accent-purple" href="summaries.html">
+    <span class="category-icon"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6zM15 3v4h4M9 11h6M9 15h6"/></svg></span>
+    <div><small>01</small><h3>الملخصات</h3><p>ملفات مرتبة حسب رمز المادة والكلية.</p></div><span class="card-arrow">←</span>
+  </a>
+  <a class="category-card accent-amber" href="lectures.html">
+    <span class="category-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4zM8 9h8M8 12h5"/></svg></span>
+    <div><small>02</small><h3>آراء الطلاب</h3><p>تجارب واقعية وتقييمات تساعدك قبل التسجيل.</p></div><span class="card-arrow">←</span>
+  </a>
+  <a class="category-card accent-sky" href="exams.html">
+    <span class="category-icon"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 2v4M16 2v4M8 10h8M8 14h5"/></svg></span>
+    <div><small>03</small><h3>توليد الجدول</h3><p>أضف المواد واكتشف التعارضات فورًا.</p></div><span class="card-arrow">←</span>
+  </a>
+  <a class="category-card accent-emerald" href="colleges.html">
+    <span class="category-icon"><svg viewBox="0 0 24 24"><path d="M3 10h18M5 10v10M9 10v10M15 10v10M19 10v10M3 20h18M12 3l9 5H3z"/></svg></span>
+    <div><small>04</small><h3>الكليات</h3><p>مجتمعات الكليات التسع وآخر أخبارها.</p></div><span class="card-arrow">←</span>
+  </a>
+  <a class="category-card accent-rose" href="projects.html">
+    <span class="category-icon"><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4zM8 7V4h8v3M4 11h16M10 11v2h4v-2"/></svg></span>
+    <div><small>05</small><h3>المشاريع</h3><p>مشاريع طلابية وروابطها في مكان واحد.</p></div><span class="card-arrow">←</span>
+  </a>
+  <a class="category-card accent-gray" href="other.html">
+    <span class="category-icon"><svg viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></svg></span>
+    <div><small>06</small><h3>أخرى</h3><p>موارد دراسية إضافية لا تنتمي لقسم محدد.</p></div><span class="card-arrow">←</span>
+  </a>
+</section>
+<footer class="footer"><strong>أنجز</strong><span>مساحة طلابية مستقلة لمشاركة المعرفة.</span></footer><dialog id="postDialog"><form id="postForm" class="modal">
   <button type="button" class="close" data-close="postDialog">×</button>
   <span class="eyebrow">مشاركة ملف</span><h2>إضافة رابط Google Drive</h2>
   <label class="field">عنوان الملف<input id="postTitle" maxlength="90" required placeholder="مثال: ملخص الفصل السابع"></label>
