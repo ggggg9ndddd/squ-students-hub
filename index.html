@@ -1,6 +1,6 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#15483f"><title>أنجز</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css?v=green-3"></head><body data-page="home"><header class="topbar">
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#15483f"><title>أنجز</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css?v=green-responsive-1"></head><body data-page="home"><header class="topbar">
   <a class="brand" href="index.html"><span class="mark">أ</span><span class="brand-text"><strong>أنجز</strong><small>منصة طلابية مستقلة</small></span></a>
-  <nav class="nav"><a href="index.html" class="active">الرئيسية</a><a href="summaries.html" class="">الملخصات</a><a href="lectures.html" class="">آراء الطلاب</a><a href="exams.html" class="">توليد الجدول</a><a href="colleges.html" class="">الكليات</a><a href="projects.html" class="">المشاريع</a><a href="other.html" class="">أخرى</a><a href="profile.html" class="">ملفي الشخصي</a></nav>
+  <nav class="nav"><a href="index.html" class="active">الرئيسية</a><a href="summaries.html" class="">الملخصات</a><a href="lectures.html" class="">آراء الطلاب</a><a href="exams.html" class="">توليد الجدول</a><a href="colleges.html" class="">الكليات</a><a href="profile.html" class="">ملفي الشخصي</a></nav>
   <div class="top-actions">
     <button id="themeToggle" class="icon-btn" aria-label="تغيير المظهر">☾</button>
     <button id="googleLogin" class="primary-btn">تسجيل الدخول</button>
@@ -52,24 +52,16 @@
     <span class="category-icon"><svg viewBox="0 0 24 24"><path d="M3 10h18M5 10v10M9 10v10M15 10v10M19 10v10M3 20h18M12 3l9 5H3z"/></svg></span>
     <div><small>04</small><h3>الكليات</h3><p>مجتمعات الكليات التسع وآخر أخبارها.</p></div><span class="card-arrow">←</span>
   </a>
-  <a class="category-card accent-rose" href="projects.html">
-    <span class="category-icon"><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4zM8 7V4h8v3M4 11h16M10 11v2h4v-2"/></svg></span>
-    <div><small>05</small><h3>المشاريع</h3><p>مشاريع طلابية وروابطها في مكان واحد.</p></div><span class="card-arrow">←</span>
-  </a>
-  <a class="category-card accent-gray" href="other.html">
-    <span class="category-icon"><svg viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></svg></span>
-    <div><small>06</small><h3>أخرى</h3><p>موارد دراسية إضافية لا تنتمي لقسم محدد.</p></div><span class="card-arrow">←</span>
-  </a>
 </section>
 <footer class="footer"><strong>أنجز</strong><span>مساحة طلابية مستقلة لمشاركة المعرفة.</span></footer><dialog id="postDialog"><form id="postForm" class="modal">
   <button type="button" class="close" data-close="postDialog">×</button>
-  <span class="eyebrow">مشاركة ملف</span><h2>إضافة رابط Google Drive</h2>
+  <span class="eyebrow">مشاركة ملخص</span><h2>إضافة رابط ملخص</h2>
   <label class="field">عنوان الملف<input id="postTitle" maxlength="90" required placeholder="مثال: ملخص الفصل السابع"></label>
-  <label class="field">القسم<select id="postCategory" required><option value="">اختر القسم</option><option>ملخص</option><option>محاضرات</option><option>اختبارات سابقة</option><option>واجبات</option><option>مشروع</option><option>أخرى</option></select></label>
+  <input id="postCategory" type="hidden" value="ملخص">
   <label class="field">اسم المادة<input id="postCourse" maxlength="70" required placeholder="مثال: اقتصاديات الموارد الطبيعية"></label>
   <label class="field">رابط Google Drive<input id="postLink" type="url" required placeholder="https://drive.google.com/..."></label>
   <label class="field">الوصف<textarea id="postDescription" maxlength="500" required placeholder="اكتب وصفًا مختصرًا"></textarea></label>
   <p class="tip">قبل النشر اجعل صلاحية الرابط: Anyone with the link → Viewer.</p>
-  <button id="publishPost" class="primary-btn full" type="submit">نشر الملف</button>
+  <button id="publishPost" class="primary-btn full" type="submit">نشر الملخص</button>
 </form></dialog>
 <dialog id="noticeDialog"><div class="modal notice"><button type="button" class="close" data-close="noticeDialog">×</button><h2 id="noticeTitle">تنبيه</h2><p id="noticeText"></p><button class="primary-btn full" data-close="noticeDialog">حسنًا</button></div></dialog><script type="module" src="app.js"></script></body></html>
