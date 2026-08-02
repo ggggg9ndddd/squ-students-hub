@@ -1,9 +1,9 @@
- :root{
-  --bg:#f3f6f3;--surface:#ffffff;--surface2:#e8efe9;--text:#14231e;--muted:#68776f;--line:#d9e2dc;
-  --accent:#15483f;--accent-soft:#e4efeb;--danger:#b43b3b;--shadow:0 18px 60px rgba(21,72,63,.12);
-  --radius:24px;--font:"Alexandria",system-ui,sans-serif;--page:#15483f;--page-soft:#e4efeb
-}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:var(--font);background:radial-gradient(circle at 10% 0%,rgba(21,72,63,.08),transparent 28%),var(--bg);color:var(--text);min-height:100vh;line-height:1.65}
+:root{--bg:#dfeee5;--surface:#f9fffb;--surface2:#cfe3d6;--text:#10251d;--muted:#557066;--line:#bad2c3;--accent:#176b4d;--accent-soft:#d2eadc;--danger:#b43b3b;--shadow:0 18px 60px rgba(15,76,53,.16);--radius:24px;--font:"Tajawal",Arial,sans-serif;--page:#176b4d;--page-soft:#d2eadc}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:var(--font);background:
+linear-gradient(rgba(226,242,232,.92),rgba(226,242,232,.92)),
+radial-gradient(circle at 12% 8%,#9fcdb2 0,transparent 34%),
+radial-gradient(circle at 88% 18%,#c2dfcc 0,transparent 32%),
+#dfeee5;color:var(--text);min-height:100vh;line-height:1.75}
 body.dark{--bg:#0f1715;--surface:#17221f;--surface2:#202d29;--text:#f6f3ec;--muted:#aeb8b3;--line:#30403b;--accent:#65d7ad;--accent-soft:#203c34;--shadow:0 20px 70px rgba(0,0,0,.32);--page:#65d7ad;--page-soft:#203c34}
 body[data-page]{--page:#15483f;--page-soft:#e4efeb}
 body.dark[data-page]{--page:#65d7ad;--page-soft:#203c34}
@@ -26,3 +26,10 @@ dialog{border:0;background:transparent;color:var(--text);padding:15px}dialog::ba
 body.dark .category-card:hover,body.dark .college-card:hover,body.dark .resource-card:hover,body.dark .opinion-card:hover{border-color:rgba(101,215,173,.35)}
 .eyebrow,.course,.open-college{color:var(--page)}
 .search:focus-within,.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--page);box-shadow:0 0 0 3px color-mix(in srgb,var(--page) 12%,transparent)}
+
+/* Strong green background and typography override */
+html,body,button,input,textarea,select{font-family:"Tajawal",Arial,sans-serif!important}
+body:not(.dark){background:linear-gradient(135deg,#d9ecdf 0%,#edf7f0 48%,#cfe5d7 100%)!important}
+body:not(.dark) .topbar{background:rgba(247,255,250,.88)!important}
+body:not(.dark) .category-card,body:not(.dark) .resource-card,body:not(.dark) .profile-card,body:not(.dark) .form-card,body:not(.dark) .schedule-card,body:not(.dark) .opinion-card,body:not(.dark) .college-card,body:not(.dark) .login-wall,body:not(.dark) .modal{background:#f8fffa!important}
+.hero-panel{background:linear-gradient(145deg,#237a58,#104a35)!important}
