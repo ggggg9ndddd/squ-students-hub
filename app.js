@@ -1,10 +1,10 @@
 import { auth, db, googleProvider } from './firebase-config.js';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
-import { addDoc, collection, deleteDoc, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+import { addDoc, collection, deleteDoc, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, where } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
-const state = { user:null, profile:null, posts:[], opinions:[], collegePosts:[], unsubscribe:null, opinionsUnsubscribe:null, collegeUnsubscribe:null };
+const state = { user:null, profile:null, posts:[], opinions:[], collegePosts:[], ratings:{}, reportedPostIds:new Set(), favoritePostIds:new Set(), unsubscribe:null, opinionsUnsubscribe:null, collegeUnsubscribe:null, ratingsUnsubscribe:null, reportsUnsubscribe:null, favoritesUnsubscribe:null };
 const fallbackAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='60' fill='%236258e8'/%3E%3Ctext x='60' y='76' text-anchor='middle' font-size='52'%3E👤%3C/text%3E%3C/svg%3E";
 
 function normalizeSearch(value=''){return String(value).toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[^a-z0-9؀-ۿ]/g,'');}
@@ -52,10 +52,113 @@ function startPosts() {
   state.unsubscribe = onSnapshot(query(collection(db,'posts'),orderBy('createdAt','desc'),limit(200)), snap => {
     state.posts = snap.docs.map(d => ({id:d.id,...d.data()}));
     renderPosts();
+    renderFavoritePosts();
   }, err => {
     console.error(err);
     $('#feed').innerHTML = '<p class="empty">تعذر تحميل الملفات. تأكد من نشر قواعد Firestore الصحيحة.</p>';
   });
+}
+
+function startFeedbackData() {
+  if (!state.user) return;
+  state.ratingsUnsubscribe?.();
+  state.reportsUnsubscribe?.();
+  state.ratingsUnsubscribe = onSnapshot(query(collection(db,'ratings'),where('uid','==',state.user.uid)), snap => {
+    state.ratings = Object.fromEntries(snap.docs.map(item => [item.data().postId, item.data().value]));
+    renderPosts();
+  }, err => console.error('ratings',err));
+  state.reportsUnsubscribe = onSnapshot(query(collection(db,'reports'),where('uid','==',state.user.uid)), snap => {
+    state.reportedPostIds = new Set(snap.docs.map(item => item.data().postId));
+    renderPosts();
+  }, err => console.error('reports',err));
+  state.favoritesUnsubscribe = onSnapshot(query(collection(db,'favorites'),where('uid','==',state.user.uid)), snap => {
+    state.favoritePostIds = new Set(snap.docs.map(item => item.data().postId));
+    renderPosts();
+    renderFavoritePosts();
+  }, err => console.error('favorites',err));
+}
+
+function feedbackMarkup(post) {
+  if (post.uid === state.user?.uid) return '';
+  const rating = Number(state.ratings[post.id] || 0);
+  const reported = state.reportedPostIds.has(post.id);
+  return `<div class="resource-feedback">
+    <span>هل كان هذا الملخص مفيدًا؟</span>
+    <div class="feedback-actions">
+      <button class="feedback-btn${rating === 1 ? ' is-selected' : ''}" type="button" data-rate-post="${post.id}" data-rate-value="1" aria-pressed="${rating === 1}">👍 مفيد</button>
+      <button class="feedback-btn${rating === -1 ? ' is-selected negative' : ''}" type="button" data-rate-post="${post.id}" data-rate-value="-1" aria-pressed="${rating === -1}">👎 يحتاج تحسين</button>
+      <button class="report-btn" type="button" data-report-post="${post.id}" ${reported ? 'disabled' : ''}>${reported ? 'تم الإبلاغ' : 'إبلاغ'}</button>
+    </div>
+  </div>`;
+}
+
+async function ratePost(button) {
+  if (!requireLogin()) return;
+  const postId = button.dataset.ratePost;
+  const post = state.posts.find(item => item.id === postId);
+  const value = Number(button.dataset.rateValue);
+  if (!post || post.uid === state.user.uid || ![1,-1].includes(value)) return;
+  button.disabled = true;
+  try {
+    await setDoc(doc(db,'ratings',`${postId}_${state.user.uid}`), { postId, uid:state.user.uid, value, updatedAt:serverTimestamp() }, { merge:true });
+  } catch (err) {
+    console.error(err);
+    showNotice('تعذر حفظ التقييم','تعذر حفظ تقييمك الآن. حاول مرة أخرى.');
+  } finally { button.disabled = false; }
+}
+
+async function toggleFavorite(button) {
+  if (!requireLogin()) return;
+  const postId = button.dataset.favoritePost;
+  const post = state.posts.find(item => item.id === postId);
+  if (!post) return;
+  const favoriteRef = doc(db,'favorites',`${postId}_${state.user.uid}`);
+  button.disabled = true;
+  try {
+    if (state.favoritePostIds.has(postId)) await deleteDoc(favoriteRef);
+    else await setDoc(favoriteRef,{postId,uid:state.user.uid,createdAt:serverTimestamp()});
+  } catch (err) {
+    console.error(err);
+    showNotice('تعذر تحديث المحفوظات','تعذر حفظ هذا الملخص الآن. حاول مرة أخرى.');
+  } finally { button.disabled = false; }
+}
+
+function ensureReportDialog() {
+  if ($('#reportDialog')) return;
+  document.body.insertAdjacentHTML('beforeend', `<dialog id="reportDialog"><form id="reportForm" class="modal"><button type="button" class="close" data-close="reportDialog">×</button><span class="eyebrow">مساعدة المجتمع</span><h2>الإبلاغ عن ملخص</h2><p class="tip">سيصل البلاغ إلى إدارة المنصة للمراجعة، ولن يظهر اسمك لصاحب المنشور.</p><label class="field">سبب البلاغ<select id="reportReason" required><option value="">اختر السبب</option><option>رابط لا يعمل</option><option>محتوى مكرر</option><option>معلومات غير صحيحة</option><option>محتوى غير مناسب</option></select></label><label class="field">ملاحظات إضافية (اختياري)<textarea id="reportDetails" maxlength="500" placeholder="اشرح المشكلة باختصار"></textarea></label><button id="submitReport" class="primary-btn full" type="submit">إرسال البلاغ</button></form></dialog>`);
+  $('#reportDialog [data-close]')?.addEventListener('click', () => $('#reportDialog').close());
+  $('#reportForm')?.addEventListener('submit', submitReport);
+}
+
+function openReportDialog(postId) {
+  if (!requireLogin()) return;
+  if (state.reportedPostIds.has(postId)) { showNotice('تم الإبلاغ سابقًا','أرسلت بلاغًا عن هذا الملخص بالفعل.'); return; }
+  ensureReportDialog();
+  $('#reportForm').dataset.postId = postId;
+  $('#reportForm').reset();
+  $('#reportDialog').showModal();
+}
+
+async function submitReport(event) {
+  event.preventDefault();
+  if (!requireLogin()) return;
+  const form = event.currentTarget;
+  const postId = form.dataset.postId;
+  const reason = $('#reportReason').value;
+  const details = $('#reportDetails').value.trim();
+  if (!postId || !reason) return;
+  const reportRef = doc(db,'reports',`${postId}_${state.user.uid}`);
+  const existing = await getDoc(reportRef);
+  if (existing.exists()) { $('#reportDialog').close(); showNotice('تم الإبلاغ سابقًا','شكرًا لحرصك، البلاغ مسجل بالفعل.'); return; }
+  const button = $('#submitReport'); button.disabled = true; button.textContent = 'جارٍ الإرسال…';
+  try {
+    await setDoc(reportRef, { postId, uid:state.user.uid, reason, details, status:'جديد', createdAt:serverTimestamp() });
+    $('#reportDialog').close();
+    showNotice('وصل البلاغ','شكرًا لمساعدتك في تحسين جودة المحتوى.');
+  } catch (err) {
+    console.error(err);
+    showNotice('تعذر الإرسال','تعذر إرسال البلاغ الآن. حاول مرة أخرى.');
+  } finally { button.disabled = false; button.textContent = 'إرسال البلاغ'; }
 }
 
 function renderPosts() {
@@ -72,13 +175,26 @@ function renderPosts() {
     <h3>${escapeHTML(p.title || '')}</h3>
     <p class="description">${escapeHTML(p.description || '')}</p>
     <div class="author"><img class="avatar" src="${escapeHTML(p.userPhoto || fallbackAvatar)}" alt=""><div><strong>${escapeHTML(p.userName || 'مستخدم')}</strong><small>${escapeHTML(p.userCollege || '')}</small></div></div>
-    <div class="resource-actions"><a class="open-link" href="${escapeHTML(p.driveUrl || '#')}" target="_blank" rel="noopener noreferrer">فتح رابط Google Drive</a>${p.uid === state.user?.uid ? `<button class="danger-btn" data-delete="${p.id}">حذف</button>` : ''}</div>
+    <div class="resource-actions"><a class="open-link" href="${escapeHTML(p.driveUrl || '#')}" target="_blank" rel="noopener noreferrer">فتح رابط Google Drive</a>${p.uid !== state.user?.uid ? `<button class="save-btn${state.favoritePostIds.has(p.id) ? ' is-saved' : ''}" type="button" data-favorite-post="${p.id}" aria-pressed="${state.favoritePostIds.has(p.id)}">${state.favoritePostIds.has(p.id) ? '★ محفوظ' : '☆ حفظ'}</button>` : ''}${p.uid === state.user?.uid ? `<button class="danger-btn" data-delete="${p.id}">حذف</button>` : ''}</div>
+    ${feedbackMarkup(p)}
   </article>`).join('');
   $$('[data-delete]').forEach(btn => btn.onclick = async () => {
     if (!confirm('هل تريد حذف هذا الملف؟')) return;
     try { await deleteDoc(doc(db,'posts',btn.dataset.delete)); }
     catch(e) { console.error(e); showNotice('تعذر الحذف','لا يمكنك حذف ملف لا تملكه.'); }
   });
+  $$('[data-rate-post]').forEach(btn => btn.onclick = () => ratePost(btn));
+  $$('[data-report-post]').forEach(btn => btn.onclick = () => openReportDialog(btn.dataset.reportPost));
+  $$('[data-favorite-post]').forEach(btn => btn.onclick = () => toggleFavorite(btn));
+}
+
+function renderFavoritePosts() {
+  const feed = $('#favoritesFeed');
+  if (!feed) return;
+  const posts = state.posts.filter(post => state.favoritePostIds.has(post.id));
+  if (!posts.length) { feed.innerHTML = '<p class="empty">لم تحفظ أي ملخص بعد. استخدم زر «حفظ» داخل أي ملخص للعودة إليه بسرعة.</p>'; return; }
+  feed.innerHTML = posts.map(post => `<article class="resource-card"><div class="resource-top"><span class="pill">محفوظ</span><span>${formatDate(post.createdAt)}</span></div><p class="course">${escapeHTML(post.course || '')}${post.college ? ` · ${escapeHTML(post.college)}` : ''}</p><h3>${escapeHTML(post.title || '')}</h3><p class="description">${escapeHTML(post.description || '')}</p><div class="resource-actions"><a class="open-link" href="${escapeHTML(post.driveUrl || '#')}" target="_blank" rel="noopener noreferrer">فتح الملف</a><button class="save-btn is-saved" type="button" data-favorite-post="${post.id}" aria-pressed="true">★ محفوظ</button></div></article>`).join('');
+  $$('[data-favorite-post]').forEach(btn => btn.onclick = () => toggleFavorite(btn));
 }
 
 
@@ -185,8 +301,8 @@ function initUI() {
 initTheme(); initUI(); initForms(); initCollegeSearch(); initCollegePage();
 onAuthStateChanged(auth, async user => {
   state.user=user;
-  if(user){await ensureUser(user);updateAuthUI();fillProfile();startPosts();startOpinions();startCollegePosts();}
-  else{state.profile=null;state.posts=[];state.opinions=[];state.collegePosts=[];state.unsubscribe?.();state.opinionsUnsubscribe?.();state.collegeUnsubscribe?.();updateAuthUI(); if($('#profileContent')){$('#profileContent').hidden=true;$('#loginWall').hidden=false;} if($('#feed'))$('#feed').innerHTML='<p class="empty">سجّل الدخول لعرض الملفات.</p>';if($('#opinionsFeed'))$('#opinionsFeed').innerHTML='<p class="empty">سجّل الدخول لعرض الآراء.</p>';if($('#communityFeed'))$('#communityFeed').innerHTML='<p class="empty">سجّل الدخول لعرض مجتمع الكلية.</p>';}
+  if(user){await ensureUser(user);updateAuthUI();fillProfile();startFeedbackData();startPosts();startOpinions();startCollegePosts();}
+  else{state.profile=null;state.posts=[];state.opinions=[];state.collegePosts=[];state.ratings={};state.reportedPostIds=new Set();state.favoritePostIds=new Set();state.unsubscribe?.();state.opinionsUnsubscribe?.();state.collegeUnsubscribe?.();state.ratingsUnsubscribe?.();state.reportsUnsubscribe?.();state.favoritesUnsubscribe?.();updateAuthUI(); if($('#profileContent')){$('#profileContent').hidden=true;$('#loginWall').hidden=false;} if($('#feed'))$('#feed').innerHTML='<p class="empty">سجّل الدخول لعرض الملفات.</p>';if($('#favoritesFeed'))$('#favoritesFeed').innerHTML='<p class="empty">سجّل الدخول لعرض محفوظاتك.</p>';if($('#opinionsFeed'))$('#opinionsFeed').innerHTML='<p class="empty">سجّل الدخول لعرض الآراء.</p>';if($('#communityFeed'))$('#communityFeed').innerHTML='<p class="empty">سجّل الدخول لعرض مجتمع الكلية.</p>';}
 });
 
 function initCollegeSearch(){const input=$('#collegeSearch');if(!input)return;input.addEventListener('input',()=>{const n=normalizeSearch(input.value);$$('.college-card').forEach(card=>card.hidden=n&&!normalizeSearch(card.textContent).includes(n));});}

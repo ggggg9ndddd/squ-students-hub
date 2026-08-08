@@ -244,6 +244,18 @@ img, svg { max-width: 100%; }
 .author small { color: var(--muted); }
 .resource-actions { margin-top: auto; display: flex; gap: 9px; }
 .open-link { flex: 1; padding: 12px; color: #fff; text-align: center; text-decoration: none; background: linear-gradient(135deg, var(--page), color-mix(in srgb, var(--page) 72%, #17124a)); }
+.save-btn { padding: 10px 12px; color: var(--page); white-space: nowrap; font-size: 12px; font-weight: 800; cursor: pointer; background: var(--page-soft); border: 1px solid color-mix(in srgb, var(--page) 18%, transparent); border-radius: 12px; transition: .2s ease; }
+.save-btn:hover, .save-btn.is-saved { color: #fff; background: var(--page); border-color: var(--page); }
+.save-btn:disabled { cursor: wait; opacity: .6; }
+.resource-feedback { padding-top: 14px; display: grid; gap: 9px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); }
+.feedback-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.feedback-btn, .report-btn { padding: 7px 10px; color: var(--muted); font-size: 12px; font-weight: 700; cursor: pointer; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; transition: .2s ease; }
+.feedback-btn:hover { color: var(--page); border-color: color-mix(in srgb, var(--page) 35%, var(--line)); }
+.feedback-btn.is-selected { color: #fff; background: var(--page); border-color: var(--page); box-shadow: 0 5px 12px color-mix(in srgb, var(--page) 25%, transparent); }
+.feedback-btn.is-selected.negative { color: #fff; background: #c2410c; border-color: #c2410c; box-shadow: 0 5px 12px rgba(194,65,12,.22); }
+.report-btn { margin-inline-start: auto; color: var(--danger); background: transparent; border-color: transparent; }
+.report-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--danger) 9%, transparent); border-color: color-mix(in srgb, var(--danger) 16%, transparent); }
+.report-btn:disabled { cursor: default; opacity: .55; }
 .empty, .loading { grid-column: 1 / -1; padding: 70px 20px; color: var(--muted); text-align: center; background: color-mix(in srgb, var(--surface-solid) 45%, transparent); border: 1px dashed var(--line-strong); border-radius: var(--radius); }
 
 .college-grid { padding-bottom: 72px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 17px; }
@@ -360,6 +372,7 @@ body.dark .schedule-alert.error { color: #ff9b93; background: rgba(217,45,32,.12
   .category-card { min-height: 178px; padding: 20px; grid-template-columns: auto 1fr; border-radius: 19px; }
   .card-arrow { display: none; }
   .resource-card, .opinion-card, .college-card, .form-card, .schedule-card { padding: 19px; border-radius: 18px; }
+  .report-btn { margin-inline-start: 0; }
   .college-hero { margin-top: 27px; padding: 31px 21px; border-radius: 23px; }
   .college-hero h1 { font-size: 35px; }
   .college-tabs { margin-inline: -3px; }
