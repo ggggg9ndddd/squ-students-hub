@@ -5,7 +5,7 @@ import { addDoc, collection, deleteDoc, doc, getDoc, limit, onSnapshot, orderBy,
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const state = { user:null, profile:null, posts:[], opinions:[], collegePosts:[], unsubscribe:null, opinionsUnsubscribe:null, collegeUnsubscribe:null };
-const fallbackAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='60' fill='%2315483f'/%3E%3Ctext x='60' y='76' text-anchor='middle' font-size='52'%3E👤%3C/text%3E%3C/svg%3E";
+const fallbackAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='60' fill='%236258e8'/%3E%3Ctext x='60' y='76' text-anchor='middle' font-size='52'%3E👤%3C/text%3E%3C/svg%3E";
 
 function normalizeSearch(value=''){return String(value).toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[^a-z0-9؀-ۿ]/g,'');}
 function escapeHTML(value='') { return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
@@ -144,6 +144,30 @@ function fillProfile() {
   $('#profileContent')?.removeAttribute('hidden');
 }
 
+function applyTheme(theme, persist = false) {
+  const isDark = theme === 'dark';
+  document.body.classList.toggle('dark', isDark);
+  const toggle = $('#themeToggle');
+  if (toggle) {
+    toggle.textContent = isDark ? '☀' : '☾';
+    toggle.setAttribute('aria-pressed', String(isDark));
+    toggle.setAttribute('aria-label', isDark ? 'تفعيل الوضع الفاتح' : 'تفعيل الوضع الداكن');
+    toggle.title = isDark ? 'الوضع الفاتح' : 'الوضع الداكن';
+  }
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#090e1b' : '#6258e8');
+  if (persist) localStorage.setItem('theme', theme);
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  const systemDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (systemDark ? 'dark' : 'light'));
+  $('#themeToggle')?.addEventListener('click', () => applyTheme(document.body.classList.contains('dark') ? 'light' : 'dark', true));
+  window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', event => {
+    if (!localStorage.getItem('theme')) applyTheme(event.matches ? 'dark' : 'light');
+  });
+}
+
 function initUI() {
   $('#googleLogin')?.addEventListener('click', async () => {
     try { await signInWithPopup(auth,googleProvider); }
@@ -155,16 +179,14 @@ function initUI() {
   $('#heroAddPost')?.addEventListener('click',()=>requireLogin() && $('#postDialog').showModal());
   $('#searchInput')?.addEventListener('input',renderPosts);
   $('#opinionSearch')?.addEventListener('input',renderOpinions);
-  $('#themeToggle')?.addEventListener('click',()=>{document.body.classList.toggle('dark');localStorage.setItem('theme',document.body.classList.contains('dark')?'dark':'light');$('#themeToggle').textContent=document.body.classList.contains('dark')?'☀':'☾';});
-  if(localStorage.getItem('theme')==='dark'){document.body.classList.add('dark');if($('#themeToggle'))$('#themeToggle').textContent='☀';}
   $$('[data-close]').forEach(btn=>btn.onclick=()=>document.getElementById(btn.dataset.close)?.close());
 }
 
-initUI(); initForms(); initCollegeSearch(); initCollegePage();
+initTheme(); initUI(); initForms(); initCollegeSearch(); initCollegePage();
 onAuthStateChanged(auth, async user => {
   state.user=user;
   if(user){await ensureUser(user);updateAuthUI();fillProfile();startPosts();startOpinions();startCollegePosts();}
-  else{state.profile=null;updateAuthUI(); if($('#profileContent')){$('#profileContent').hidden=true;$('#loginWall').hidden=false;} if($('#feed'))$('#feed').innerHTML='<p class="empty">سجّل الدخول لعرض الملفات.</p>';}
+  else{state.profile=null;state.posts=[];state.opinions=[];state.collegePosts=[];state.unsubscribe?.();state.opinionsUnsubscribe?.();state.collegeUnsubscribe?.();updateAuthUI(); if($('#profileContent')){$('#profileContent').hidden=true;$('#loginWall').hidden=false;} if($('#feed'))$('#feed').innerHTML='<p class="empty">سجّل الدخول لعرض الملفات.</p>';if($('#opinionsFeed'))$('#opinionsFeed').innerHTML='<p class="empty">سجّل الدخول لعرض الآراء.</p>';if($('#communityFeed'))$('#communityFeed').innerHTML='<p class="empty">سجّل الدخول لعرض مجتمع الكلية.</p>';}
 });
 
 function initCollegeSearch(){const input=$('#collegeSearch');if(!input)return;input.addEventListener('input',()=>{const n=normalizeSearch(input.value);$$('.college-card').forEach(card=>card.hidden=n&&!normalizeSearch(card.textContent).includes(n));});}

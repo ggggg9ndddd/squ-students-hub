@@ -1,0 +1,14 @@
+{
+  "name": "أنجز",
+  "short_name": "أنجز",
+  "description": "مساحة طلابية عربية لمشاركة المعرفة وتنظيم الدراسة.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#6258e8",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
