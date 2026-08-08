@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#6258e8">
+  <meta name="description" content="محادثات خاصة وآمنة بين طلاب منصة أنجز.">
+  <title>الرسائل الخاصة | أنجز</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=social-1">
+</head>
+<body data-page="messages">
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="mark">أ</span><span class="brand-text"><strong>أنجز</strong><small>منصة طلابية مستقلة</small></span></a>
+    <nav class="nav"><a href="index.html">الرئيسية</a><a href="summaries.html">الملخصات</a><a href="lectures.html">آراء الطلاب</a><a href="exams.html">توليد الجدول</a><a href="colleges.html">الكليات</a><a href="profile.html">ملفي الشخصي</a></nav>
+    <div class="top-actions"><button id="themeToggle" class="icon-btn" aria-label="تغيير المظهر">☾</button><button id="googleLogin" class="primary-btn">تسجيل الدخول</button><div id="userMenu" class="user-chip" hidden><a href="profile.html"><img id="userPhoto" alt="صورة المستخدم"></a><div><strong id="userName"></strong><small id="userEmail"></small></div><button id="logoutButton" class="ghost-btn">خروج</button></div></div>
+  </header>
+  <main class="shell">
+    <section id="socialLoginWall" class="login-wall"><span class="eyebrow">رسائل خاصة</span><h1>تواصل داخل مجتمعك</h1><p>سجّل الدخول لبدء محادثة خاصة مع الطلاب.</p><button class="primary-btn" onclick="document.getElementById('googleLogin').click()">تسجيل الدخول</button></section>
+    <section id="messagesApp" class="messages-layout" hidden>
+      <aside class="conversation-sidebar">
+        <div class="sidebar-heading"><div><span class="eyebrow">المحادثات</span><h1>رسائلك</h1></div></div>
+        <label class="search user-search">⌕<input id="peopleSearch" type="search" placeholder="ابحث عن طالب بالاسم أو الكلية…"></label>
+        <div id="peopleResults" class="people-results"></div>
+        <div id="conversationsList" class="conversations-list"><p class="empty">لا توجد محادثات بعد.</p></div>
+      </aside>
+      <section class="chat-panel">
+        <div id="chatEmpty" class="chat-empty"><span class="chat-icon">✦</span><h2>ابدأ محادثة خاصة</h2><p>ابحث عن طالب من القائمة، ثم ابدأ الحديث معه مباشرة.</p></div>
+        <div id="chatContent" hidden>
+          <header class="chat-header"><div class="chat-person"><img id="chatAvatar" class="avatar" alt=""><div><strong id="chatName"></strong><small id="chatCollege"></small></div></div></header>
+          <div id="messagesList" class="messages-list"></div>
+          <form id="messageForm" class="message-form"><textarea id="messageText" maxlength="1000" required placeholder="اكتب رسالة…"></textarea><button id="sendMessage" class="primary-btn" type="submit">إرسال</button></form>
+        </div>
+      </section>
+    </section>
+  </main>
+  <footer class="footer"><strong>أنجز</strong><span>مساحة طلابية مستقلة لمشاركة المعرفة.</span></footer>
+  <dialog id="noticeDialog"><div class="modal notice"><button type="button" class="close" data-close="noticeDialog">×</button><h2 id="noticeTitle">تنبيه</h2><p id="noticeText"></p><button class="primary-btn full" data-close="noticeDialog">حسنًا</button></div></dialog>
+  <script type="module" src="app.js"></script><script type="module" src="social.js"></script>
+</body>
+</html>

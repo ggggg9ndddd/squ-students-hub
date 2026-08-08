@@ -29,6 +29,7 @@ async function ensureUser(user) {
     lastSeen:serverTimestamp()
   };
   await setDoc(ref,data,{merge:true});
+  await setDoc(doc(db,'publicProfiles',user.uid),{uid:user.uid,name:data.name,photoURL:data.photoURL,college:data.college,major:data.major,updatedAt:serverTimestamp()},{merge:true});
   state.profile = {...current,...data};
 }
 
@@ -239,7 +240,7 @@ function initForms() {
     e.preventDefault(); if (!requireLogin()) return;
     const btn=$('#saveProfile'); btn.disabled=true; btn.textContent='جارٍ الحفظ…';
     const profile={uid:state.user.uid,name:$('#profileName').value.trim(),email:state.user.email || '',photoURL:state.user.photoURL || '',college:$('#profileCollege').value.trim(),major:$('#profileMajor').value.trim(),bio:$('#profileBio').value.trim(),updatedAt:serverTimestamp()};
-    try { await setDoc(doc(db,'users',state.user.uid),profile,{merge:true}); state.profile={...state.profile,...profile}; fillProfile(); updateAuthUI(); showNotice('تم الحفظ','تم تحديث ملفك الشخصي بنجاح.'); }
+    try { await setDoc(doc(db,'users',state.user.uid),profile,{merge:true}); await setDoc(doc(db,'publicProfiles',state.user.uid),{uid:state.user.uid,name:profile.name,photoURL:profile.photoURL,college:profile.college,major:profile.major,updatedAt:serverTimestamp()},{merge:true}); state.profile={...state.profile,...profile}; fillProfile(); updateAuthUI(); showNotice('تم الحفظ','تم تحديث ملفك الشخصي بنجاح.'); }
     catch(err){ console.error(err); showNotice('تعذر الحفظ','تأكد من قواعد Firestore.'); }
     finally { btn.disabled=false; btn.textContent='حفظ التغييرات'; }
   });
@@ -285,6 +286,11 @@ function initTheme() {
 }
 
 function initUI() {
+  const nav = $('.nav');
+  if (nav && !nav.querySelector('[data-social-link]')) {
+    nav.insertAdjacentHTML('beforeend','<a data-social-link href="stories.html">القصص</a><a data-social-link href="messages.html">الرسائل</a>');
+    nav.querySelectorAll('[data-social-link]').forEach(link => { if (link.getAttribute('href') === location.pathname.split('/').pop()) link.classList.add('active'); });
+  }
   $('#googleLogin')?.addEventListener('click', async () => {
     try { await signInWithPopup(auth,googleProvider); }
     catch(err) { console.error(err); showNotice('تعذر تسجيل الدخول', err.code === 'auth/unauthorized-domain' ? 'أضف نطاق GitHub Pages في Authorized domains داخل Firebase.' : 'أُغلقت نافذة الدخول أو تعذر الاتصال.'); }

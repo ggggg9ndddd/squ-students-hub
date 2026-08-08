@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#6258e8">
+  <meta name="description" content="قصص طلاب منصة أنجز التي تختفي بعد 24 ساعة.">
+  <title>القصص | أنجز</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=social-1">
+</head>
+<body data-page="stories">
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="mark">أ</span><span class="brand-text"><strong>أنجز</strong><small>منصة طلابية مستقلة</small></span></a>
+    <nav class="nav"><a href="index.html">الرئيسية</a><a href="summaries.html">الملخصات</a><a href="lectures.html">آراء الطلاب</a><a href="exams.html">توليد الجدول</a><a href="colleges.html">الكليات</a><a href="profile.html">ملفي الشخصي</a></nav>
+    <div class="top-actions"><button id="themeToggle" class="icon-btn" aria-label="تغيير المظهر">☾</button><button id="googleLogin" class="primary-btn">تسجيل الدخول</button><div id="userMenu" class="user-chip" hidden><a href="profile.html"><img id="userPhoto" alt="صورة المستخدم"></a><div><strong id="userName"></strong><small id="userEmail"></small></div><button id="logoutButton" class="ghost-btn">خروج</button></div></div>
+  </header>
+  <main class="shell">
+    <section id="socialLoginWall" class="login-wall"><span class="eyebrow">قصص الطلاب</span><h1>شارك لحظتك الدراسية</h1><p>سجّل الدخول لمشاهدة القصص أو نشر قصتك التي تختفي بعد 24 ساعة.</p><button class="primary-btn" onclick="document.getElementById('googleLogin').click()">تسجيل الدخول</button></section>
+    <section id="storiesApp" hidden>
+      <section class="section-head stories-heading"><div><span class="eyebrow">تختفي بعد 24 ساعة</span><h1>قصص الطلاب</h1><p>شارك تنبيهًا أو إنجازًا أو معلومة سريعة مع مجتمعك.</p></div><button id="openStoryComposer" class="primary-btn">+ إضافة قصة</button></section>
+      <section id="storiesFeed" class="stories-grid"><p class="loading">جارٍ تحميل القصص…</p></section>
+    </section>
+  </main>
+  <dialog id="storyComposer"><form id="storyForm" class="modal"><button type="button" class="close" data-close="storyComposer">×</button><span class="eyebrow">قصتك</span><h2>أضف قصة جديدة</h2><label class="field">النص (اختياري)<textarea id="storyText" maxlength="500" placeholder="شارك شيئًا مفيدًا أو جميلًا…"></textarea></label><label class="field">صورة (اختيارية)<input id="storyImage" type="file" accept="image/*"></label><label class="field">لون الخلفية<select id="storyBackground"><option value="violet">بنفسجي</option><option value="blue">أزرق</option><option value="emerald">أخضر</option><option value="sunset">غروب</option></select></label><p class="tip">اكتب نصًا أو أضف صورة واحدة. الحد الأقصى للصورة 5 MB، وتختفي القصة من العرض بعد 24 ساعة.</p><button id="publishStory" class="primary-btn full" type="submit">نشر القصة</button></form></dialog>
+  <dialog id="storyViewer"><div class="story-viewer"><button type="button" class="close" data-close="storyViewer">×</button><div id="storyViewContent"></div></div></dialog>
+  <footer class="footer"><strong>أنجز</strong><span>مساحة طلابية مستقلة لمشاركة المعرفة.</span></footer>
+  <dialog id="noticeDialog"><div class="modal notice"><button type="button" class="close" data-close="noticeDialog">×</button><h2 id="noticeTitle">تنبيه</h2><p id="noticeText"></p><button class="primary-btn full" data-close="noticeDialog">حسنًا</button></div></dialog>
+  <script type="module" src="app.js"></script><script type="module" src="social.js"></script>
+</body>
+</html>
