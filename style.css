@@ -124,6 +124,24 @@ img, svg { max-width: 100%; }
 .nav a.active::after { content: ""; position: absolute; right: 35%; left: 35%; bottom: 4px; height: 2px; border-radius: 99px; background: var(--page); }
 .top-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
 
+.install-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  color: #fff;
+  background: linear-gradient(135deg, #786cf7, #09a8d6);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(63,54,190,.25);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.install-btn span:first-child { font-size: 18px; line-height: 12px; }
+.install-btn[hidden] { display: none; }
+
 .icon-btn, .ghost-btn, .primary-btn, .secondary-btn, .danger-btn, .open-link, .tab-btn {
   border: 0;
   border-radius: 12px;
@@ -453,6 +471,7 @@ body.dark .hero-panel { box-shadow: 0 35px 100px rgba(0,0,0,.44); }
   .mark { width: 40px; height: 40px; }
   .top-actions { gap: 6px; }
   .top-actions .primary-btn { padding: 10px 12px; font-size: 12px; }
+  .install-btn { padding: 9px 10px; font-size: 11px; }
   .icon-btn, .user-chip img { width: 38px; height: 38px; }
   .user-chip .ghost-btn { width: 38px; height: 38px; padding: 0; font-size: 0; }
   .user-chip .ghost-btn::after { content: "↪"; font-size: 18px; }
@@ -500,6 +519,32 @@ body.dark .hero-panel { box-shadow: 0 35px 100px rgba(0,0,0,.44); }
   .dashboard-highlight { grid-template-columns: 1fr; }
   .gpa-row { grid-template-columns: 1fr 62px 64px 28px; }
 }
+
+.offline-page {
+  width: min(540px, calc(100% - 32px));
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.offline-mark {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 22px;
+  border-radius: 25px;
+  color: #fff;
+  background: linear-gradient(135deg, #8b83ff, #0ea5e9);
+  font-size: 39px;
+  font-weight: 800;
+  box-shadow: 0 18px 44px rgba(98,88,232,.36);
+}
+.offline-page h1 { margin: 6px 0 12px; font-size: clamp(28px, 8vw, 42px); }
+.offline-page p:not(.eyebrow) { max-width: 430px; line-height: 1.9; color: var(--muted); margin: 0 0 25px; }
 
 @media (max-width: 390px) {
   .top-actions .primary-btn { padding: 9px 10px; font-size: 11px; }

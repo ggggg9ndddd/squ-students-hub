@@ -1,12 +1,15 @@
 {
-  "name": "أنجز",
+  "id": "./",
+  "name": "أنجز Campus",
   "short_name": "أنجز",
-  "description": "مساحة طلابية عربية لمشاركة المعرفة وتنظيم الدراسة.",
+  "description": "رفيقك الجامعي لتنظيم الدراسة وأدواتك الأكاديمية.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#f5f7fb",
+  "orientation": "portrait-primary",
+  "background_color": "#090e1b",
   "theme_color": "#6258e8",
   "icons": [
     { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
